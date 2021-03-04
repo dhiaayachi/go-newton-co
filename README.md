@@ -15,3 +15,8 @@ n := New(<ClientId>, <ClientSecret>)
   
 ```
 
+TODO:
+
+- [x] API for private endpoints
+- [ ] API for public endpoints
+- [ ] Add sandbox environment for unit tests
