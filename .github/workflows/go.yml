@@ -22,4 +22,7 @@ jobs:
       run: go build -v ./...
 
     - name: Test
+      env:
+        CLIENT_ID: ${{ secrets.CLIENT_ID }}
+        CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
       run: go test -v ./...
