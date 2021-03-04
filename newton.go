@@ -9,13 +9,14 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 )
 
-const BaseUrl = "https://api.newton.co/v1"
+const baseUrl = "https://api.newton.co/v1"
 
 type Newton struct {
 	clientId     string
@@ -115,7 +116,7 @@ func (n *Newton) sign(req *http.Request) error {
 
 	currentTime = strconv.FormatInt(time.Now().Unix(), 10)
 
-	strs := []string{
+	toJoin := []string{
 		method,
 		contentType,
 		apiPath,
@@ -123,7 +124,7 @@ func (n *Newton) sign(req *http.Request) error {
 		currentTime,
 	}
 
-	raw := strings.Join(strs, ":")
+	raw := strings.Join(toJoin, ":")
 
 	mac := hmac.New(sha256.New, []byte(n.clientSecret))
 	if _, err := mac.Write([]byte(raw)); err != nil {
@@ -139,7 +140,7 @@ func (n *Newton) sign(req *http.Request) error {
 }
 
 func doPublicQuery(path string, method string, args []Args, body string) (*http.Response, error) {
-	url := BaseUrl + path
+	url := baseUrl + path
 
 	req, _ := http.NewRequest(method, url, nil)
 	q := req.URL.Query()
@@ -160,7 +161,7 @@ func doPublicQuery(path string, method string, args []Args, body string) (*http.
 }
 
 func (n *Newton) doPrivateQuery(path string, method string, args []Args, body string) (*http.Response, error) {
-	url := BaseUrl + path
+	url := baseUrl + path
 
 	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
 	q := req.URL.Query()
@@ -189,7 +190,12 @@ func (n *Newton) Balances(asset string) (*BalancesResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Printf("error:%s", err.Error())
+		}
+	}()
 	if res.StatusCode != 200 {
 		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
 	}
@@ -228,7 +234,12 @@ func (n *Newton) Actions(actionType string, endDate int64, limit int, offset int
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Printf("error:%s", err.Error())
+		}
+	}()
 	if res.StatusCode != 200 {
 		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
 	}
@@ -270,7 +281,12 @@ func (n *Newton) OrdersHistory(endDate int64, limit int, offset int, startDate i
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Printf("error:%s", err.Error())
+		}
+	}()
 	if res.StatusCode != 200 {
 		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
 	}
@@ -306,7 +322,12 @@ func (n *Newton) OpenOrders(limit int, offset int, symbol string, timeInForce st
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Printf("error:%s", err.Error())
+		}
+	}()
 	if res.StatusCode != 200 {
 		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
 	}
@@ -335,7 +356,12 @@ func (n *Newton) NewOrder(orderType string, timeInForce string, side string, sym
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Printf("error:%s", err.Error())
+		}
+	}()
 	if res.StatusCode != 200 {
 		body, _ := ioutil.ReadAll(res.Body)
 		return nil, errors.New(fmt.Sprintf("request failed :: %d %s", res.StatusCode, body))
