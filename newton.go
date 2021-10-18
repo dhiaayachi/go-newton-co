@@ -45,6 +45,12 @@ type NewOrderReq struct {
 	Quantity    float64 `json:"quantity"`
 }
 
+type Tick struct {
+	Tick       float64 `json:"tick"`
+}
+
+type GetTickSizesResp map[string]Tick
+
 type BalancesResp struct {
 	Balances map[string]float64
 }
@@ -147,7 +153,9 @@ func (n *Newton) sign(req *http.Request) error {
 	return nil
 }
 
-func doPublicQuery(path string, method string, args []Args, body string) (*http.Response, error) {
+// Public API
+///////////////////////////////////////////////////////////////////////////////////////////////////
+func (n *Newton) doPublicQuery(path string, method string, args []Args, body string) (*http.Response, error) {
 	url := baseUrl + path
 
 	req, _ := http.NewRequest(method, url, nil)
@@ -168,6 +176,35 @@ func doPublicQuery(path string, method string, args []Args, body string) (*http.
 	return res, err
 }
 
+func (n *Newton) GetTickSizes() (*GetTickSizesResp, error) {
+	res, err := n.doPublicQuery("/order/tick-sizes", http.MethodGet, []Args{}, "")
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Printf("error:%s", err.Error())
+		}
+	}()
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
+	}
+
+	body, _ := ioutil.ReadAll(res.Body)
+
+	var resp GetTickSizesResp
+	err = json.Unmarshal(body, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+
+// Private API
+///////////////////////////////////////////////////////////////////////////////////////////////////
 func (n *Newton) doPrivateQuery(path string, method string, args []Args, body string) (*http.Response, error) {
 	url := baseUrl + path
 
@@ -205,7 +242,7 @@ func (n *Newton) Balances(asset string) (*BalancesResp, error) {
 			log.Printf("error:%s", err.Error())
 		}
 	}()
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusOK {
 		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
 	}
 
@@ -250,7 +287,7 @@ func (n *Newton) Actions(actionType ActionType, limit int, offset int, startDate
 		}
 	}()
 	body, _ := ioutil.ReadAll(res.Body)
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusOK {
 		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
 	}
 
@@ -296,7 +333,7 @@ func (n *Newton) OrdersHistory(limit int, offset int, startDate int64, endDate i
 		}
 	}()
 	body, _ := ioutil.ReadAll(res.Body)
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusOK {
 		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
 	}
 
@@ -335,7 +372,7 @@ func (n *Newton) OpenOrders(limit int, offset int, symbol string, timeInForce st
 			log.Printf("error:%s", err.Error())
 		}
 	}()
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusOK {
 		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
 	}
 
@@ -369,7 +406,7 @@ func (n *Newton) NewOrder(orderType string, timeInForce string, side string, sym
 			log.Printf("error:%s", err.Error())
 		}
 	}()
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusOK {
 		body, _ := ioutil.ReadAll(res.Body)
 		return nil, errors.New(fmt.Sprintf("request failed :: %d %s", res.StatusCode, body))
 	}
