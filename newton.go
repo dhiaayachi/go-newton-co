@@ -102,7 +102,7 @@ func (n *Newton) sign(req *http.Request) error {
 	}
 
 	apiPath = req.URL.Path
-	if req.Body != nil {
+	if req.Body != http.NoBody {
 		b, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			return fmt.Errorf("read all body: %w", err)
@@ -168,6 +168,7 @@ func (n *Newton) doPrivateQuery(path string, method string, args []Args, body st
 	for _, a := range args {
 		q.Add(a.Key, a.Value)
 	}
+	req.URL.RawQuery = q.Encode()
 	if method != http.MethodGet {
 		req.Header.Add("content-type", "application/json")
 	}
@@ -182,10 +183,10 @@ func (n *Newton) doPrivateQuery(path string, method string, args []Args, body st
 
 func (n *Newton) Balances(asset string) (*BalancesResp, error) {
 
-	a := make([]Args, 10)
+	a := make([]Args, 1)
 
-	a[1].Key = "asset"
-	a[1].Value = asset
+	a[0].Key = "asset"
+	a[0].Value = asset
 	res, err := n.doPrivateQuery("/balances", http.MethodGet, a, "")
 	if err != nil {
 		return nil, err
