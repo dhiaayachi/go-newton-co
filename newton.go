@@ -47,21 +47,21 @@ type NewOrderReq struct {
 
 type GetTickSizesResp struct {
 	Ticks map[string]struct {
-		Tick       float64 `json:"tick"`
+		Tick float64 `json:"tick"`
 	}
 }
 
 type GetMaxTradeAmountsResp struct {
 	TradeAmounts map[string]struct {
-		Buy       float64 `json:"buy"`
-		Sell       float64 `json:"sell"`
+		Buy  float64 `json:"buy"`
+		Sell float64 `json:"sell"`
 	}
 }
 
 type GetApplicableFeesResp struct {
 	Fees struct {
-		Maker       float64 `json:"maker"`
-		Taker       float64 `json:"taker"`
+		Maker float64 `json:"maker"`
+		Taker float64 `json:"taker"`
 	}
 }
 
