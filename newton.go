@@ -52,7 +52,7 @@ type GetTickSizesResp struct {
 }
 
 type GetMaxTradeAmountsResp struct {
-	MaxTradeAmounts map[string]struct {
+	TradeAmounts map[string]struct {
 		Buy       float64 `json:"buy"`
 		Sell       float64 `json:"sell"`
 	}
@@ -64,6 +64,8 @@ type GetApplicableFeesResp struct {
 		Taker       float64 `json:"taker"`
 	}
 }
+
+type GetMinTradeAmountsResp GetMaxTradeAmountsResp
 
 type GetSymbolsResp struct {
 	Symbols []string
@@ -239,7 +241,7 @@ func (n *Newton) GetMaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
 	body, _ := ioutil.ReadAll(res.Body)
 
 	var resp GetMaxTradeAmountsResp
-	err = json.Unmarshal(body, &resp.MaxTradeAmounts)
+	err = json.Unmarshal(body, &resp.TradeAmounts)
 	if err != nil {
 		return nil, err
 	}
@@ -301,6 +303,50 @@ func (n *Newton) GetSymbols(baseAsset, quoteAsset string) (*GetSymbolsResp, erro
 
 	var resp GetSymbolsResp
 	err = json.Unmarshal(body, &resp.Symbols)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+func (n *Newton) HealthCheck() error {
+	res, err := n.doPublicQuery("/symbols", http.MethodGet, []Args{}, "")
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Printf("error:%s", err.Error())
+		}
+	}()
+	if res.StatusCode != http.StatusOK {
+		return errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
+	}
+
+	return nil
+}
+
+func (n *Newton) GetMinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
+	res, err := n.doPublicQuery("/order/minimums", http.MethodGet, []Args{}, "")
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Printf("error:%s", err.Error())
+		}
+	}()
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
+	}
+
+	body, _ := ioutil.ReadAll(res.Body)
+
+	var resp GetMinTradeAmountsResp
+	err = json.Unmarshal(body, &resp.TradeAmounts)
 	if err != nil {
 		return nil, err
 	}

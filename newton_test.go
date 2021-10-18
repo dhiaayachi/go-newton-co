@@ -56,6 +56,28 @@ func TestSymbolsNoQuery(t *testing.T) {
 	}
 }
 
+func TestHealthCheck(t *testing.T) {
+	ClientId, ClientSecret := getSecrets()
+	n := New(ClientId, ClientSecret)
+
+	err := n.HealthCheck()
+
+	if err != nil {
+		t.Error("test failed: " + err.Error())
+	}
+}
+
+func TestGetMinTradeAmounts(t *testing.T) {
+	ClientId, ClientSecret := getSecrets()
+	n := New(ClientId, ClientSecret)
+
+	_, err := n.GetMinimumTradeAmount()
+
+	if err != nil {
+		t.Error("test failed: " + err.Error())
+	}
+}
+
 // Private API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 func TestBalance(t *testing.T) {
