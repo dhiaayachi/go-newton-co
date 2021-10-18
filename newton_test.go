@@ -45,6 +45,17 @@ func TestGetApplicableFees(t *testing.T) {
 	}
 }
 
+func TestSymbolsNoQuery(t *testing.T) {
+	ClientId, ClientSecret := getSecrets()
+	n := New(ClientId, ClientSecret)
+
+	_, err := n.GetSymbols("", "")
+
+	if err != nil {
+		t.Error("test failed: " + err.Error())
+	}
+}
+
 // Private API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 func TestBalance(t *testing.T) {

@@ -65,6 +65,10 @@ type GetApplicableFeesResp struct {
 	}
 }
 
+type GetSymbolsResp struct {
+	Symbols []string
+}
+
 type BalancesResp struct {
 	Balances map[string]float64
 }
@@ -177,6 +181,7 @@ func (n *Newton) doPublicQuery(path string, method string, args []Args, body str
 	for _, a := range args {
 		q.Add(a.Key, a.Value)
 	}
+	req.URL.RawQuery = q.Encode()
 	if method != http.MethodGet {
 		_, err := req.Body.Read([]byte(body))
 		if err != nil {
@@ -268,6 +273,40 @@ func (n *Newton) GetApplicableFees() (*GetApplicableFeesResp, error) {
 	return &resp, nil
 }
 
+func (n *Newton) GetSymbols(baseAsset, quoteAsset string) (*GetSymbolsResp, error) {
+	args := []Args{}
+	if baseAsset != "" {
+		args = append(args, Args{Key: "base_asset", Value: baseAsset})
+	}
+
+	if quoteAsset != "" {
+		args = append(args, Args{Key: "quote_asset", Value: quoteAsset})
+	}
+
+	res, err := n.doPublicQuery("/symbols", http.MethodGet, args, "")
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Printf("error:%s", err.Error())
+		}
+	}()
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
+	}
+
+	body, _ := ioutil.ReadAll(res.Body)
+
+	var resp GetSymbolsResp
+	err = json.Unmarshal(body, &resp.Symbols)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
 
 // Private API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
