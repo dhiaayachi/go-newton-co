@@ -18,6 +18,14 @@ import (
 
 const baseUrl = "https://api.newton.co/v1"
 
+type ActionType string
+
+const (
+	DEPOSIT    ActionType = "DEPOSIT"
+	WITHDRAWAL ActionType = "WITHDRAWAL"
+	TRANSACT   ActionType = "TRANSACT"
+)
+
 type Newton struct {
 	clientId     string
 	clientSecret string
@@ -212,24 +220,24 @@ func (n *Newton) Balances(asset string) (*BalancesResp, error) {
 	return &b, nil
 }
 
-func (n *Newton) Actions(actionType string, endDate int64, limit int, offset int, startDate int64) (*ActionsResp, error) {
+func (n *Newton) Actions(actionType ActionType, limit int, offset int, startDate int64, endDate int64) (*ActionsResp, error) {
 
-	a := make([]Args, 10)
+	a := make([]Args, 5)
 
-	a[1].Key = "action_type"
-	a[1].Value = actionType
+	a[0].Key = "action_type"
+	a[0].Value = string(actionType)
 
-	a[2].Key = "end_date"
-	a[2].Value = strconv.FormatInt(endDate, 10)
+	a[1].Key = "end_date"
+	a[1].Value = strconv.FormatInt(endDate, 10)
 
-	a[3].Key = "limit"
-	a[3].Value = strconv.Itoa(limit)
+	a[2].Key = "limit"
+	a[2].Value = strconv.Itoa(limit)
 
-	a[4].Key = "offset"
-	a[4].Value = strconv.Itoa(offset)
+	a[3].Key = "offset"
+	a[3].Value = strconv.Itoa(offset)
 
-	a[5].Key = "start_date"
-	a[5].Value = strconv.FormatInt(startDate, 10)
+	a[4].Key = "start_date"
+	a[4].Value = strconv.FormatInt(startDate, 10)
 
 	res, err := n.doPrivateQuery("/actions", http.MethodGet, a, "")
 	if err != nil {
@@ -241,11 +249,10 @@ func (n *Newton) Actions(actionType string, endDate int64, limit int, offset int
 			log.Printf("error:%s", err.Error())
 		}
 	}()
+	body, _ := ioutil.ReadAll(res.Body)
 	if res.StatusCode != 200 {
 		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
 	}
-
-	body, _ := ioutil.ReadAll(res.Body)
 
 	var r ActionsResp
 	err = json.Unmarshal(body, &r.Actions)
@@ -256,7 +263,7 @@ func (n *Newton) Actions(actionType string, endDate int64, limit int, offset int
 	return &r, nil
 }
 
-func (n *Newton) OrdersHistory(endDate int64, limit int, offset int, startDate int64, symbol string, timeInForce string) (*OrdersHistoryResp, error) {
+func (n *Newton) OrdersHistory(limit int, offset int, startDate int64, endDate int64, symbol string, timeInForce string) (*OrdersHistoryResp, error) {
 
 	a := make([]Args, 10)
 
@@ -288,11 +295,10 @@ func (n *Newton) OrdersHistory(endDate int64, limit int, offset int, startDate i
 			log.Printf("error:%s", err.Error())
 		}
 	}()
+	body, _ := ioutil.ReadAll(res.Body)
 	if res.StatusCode != 200 {
 		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
 	}
-
-	body, _ := ioutil.ReadAll(res.Body)
 
 	var r OrdersHistoryResp
 	err = json.Unmarshal(body, &r.OrdersHistory)
