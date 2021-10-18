@@ -45,11 +45,25 @@ type NewOrderReq struct {
 	Quantity    float64 `json:"quantity"`
 }
 
-type Tick struct {
-	Tick       float64 `json:"tick"`
+type GetTickSizesResp struct {
+	Ticks map[string]struct {
+		Tick       float64 `json:"tick"`
+	}
 }
 
-type GetTickSizesResp map[string]Tick
+type GetMaxTradeAmountsResp struct {
+	MaxTradeAmounts map[string]struct {
+		Buy       float64 `json:"buy"`
+		Sell       float64 `json:"sell"`
+	}
+}
+
+type GetApplicableFeesResp struct {
+	Fees struct {
+		Maker       float64 `json:"maker"`
+		Taker       float64 `json:"taker"`
+	}
+}
 
 type BalancesResp struct {
 	Balances map[string]float64
@@ -194,7 +208,59 @@ func (n *Newton) GetTickSizes() (*GetTickSizesResp, error) {
 	body, _ := ioutil.ReadAll(res.Body)
 
 	var resp GetTickSizesResp
-	err = json.Unmarshal(body, &resp)
+	err = json.Unmarshal(body, &resp.Ticks)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+func (n *Newton) GetMaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
+	res, err := n.doPublicQuery("/order/maximums", http.MethodGet, []Args{}, "")
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Printf("error:%s", err.Error())
+		}
+	}()
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
+	}
+
+	body, _ := ioutil.ReadAll(res.Body)
+
+	var resp GetMaxTradeAmountsResp
+	err = json.Unmarshal(body, &resp.MaxTradeAmounts)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+func (n *Newton) GetApplicableFees() (*GetApplicableFeesResp, error) {
+	res, err := n.doPublicQuery("/fees", http.MethodGet, []Args{}, "")
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Printf("error:%s", err.Error())
+		}
+	}()
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
+	}
+
+	body, _ := ioutil.ReadAll(res.Body)
+
+	var resp GetApplicableFeesResp
+	err = json.Unmarshal(body, &resp.Fees)
 	if err != nil {
 		return nil, err
 	}

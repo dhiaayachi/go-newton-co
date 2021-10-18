@@ -23,6 +23,28 @@ func TestGetTickSizes(t *testing.T) {
 	}
 }
 
+func TestGetMaximumTradeAmounts(t *testing.T) {
+	ClientId, ClientSecret := getSecrets()
+	n := New(ClientId, ClientSecret)
+
+	_, err := n.GetMaximumTradeAmounts()
+
+	if err != nil {
+		t.Error("test failed: " + err.Error())
+	}
+}
+
+func TestGetApplicableFees(t *testing.T) {
+	ClientId, ClientSecret := getSecrets()
+	n := New(ClientId, ClientSecret)
+
+	_, err := n.GetApplicableFees()
+
+	if err != nil {
+		t.Error("test failed: " + err.Error())
+	}
+}
+
 // Private API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 func TestBalance(t *testing.T) {
