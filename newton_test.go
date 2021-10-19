@@ -1,6 +1,7 @@
 package newton
 
 import (
+	"os"
 	"testing"
 	"time"
 )
@@ -9,6 +10,76 @@ func getSecrets() (string, string) {
 	return os.Getenv("CLIENT_ID"), os.Getenv("CLIENT_SECRET")
 }
 
+// Public API
+///////////////////////////////////////////////////////////////////////////////////////////////////
+func TestGetTickSizes(t *testing.T) {
+	ClientId, ClientSecret := getSecrets()
+	n := New(ClientId, ClientSecret)
+
+	_, err := n.GetTickSizes()
+
+	if err != nil {
+		t.Error("test failed: " + err.Error())
+	}
+}
+
+func TestGetMaximumTradeAmounts(t *testing.T) {
+	ClientId, ClientSecret := getSecrets()
+	n := New(ClientId, ClientSecret)
+
+	_, err := n.GetMaximumTradeAmounts()
+
+	if err != nil {
+		t.Error("test failed: " + err.Error())
+	}
+}
+
+func TestGetApplicableFees(t *testing.T) {
+	ClientId, ClientSecret := getSecrets()
+	n := New(ClientId, ClientSecret)
+
+	_, err := n.GetApplicableFees()
+
+	if err != nil {
+		t.Error("test failed: " + err.Error())
+	}
+}
+
+func TestSymbolsNoQuery(t *testing.T) {
+	ClientId, ClientSecret := getSecrets()
+	n := New(ClientId, ClientSecret)
+
+	_, err := n.GetSymbols("", "")
+
+	if err != nil {
+		t.Error("test failed: " + err.Error())
+	}
+}
+
+func TestHealthCheck(t *testing.T) {
+	ClientId, ClientSecret := getSecrets()
+	n := New(ClientId, ClientSecret)
+
+	err := n.HealthCheck()
+
+	if err != nil {
+		t.Error("test failed: " + err.Error())
+	}
+}
+
+func TestGetMinTradeAmounts(t *testing.T) {
+	ClientId, ClientSecret := getSecrets()
+	n := New(ClientId, ClientSecret)
+
+	_, err := n.GetMinimumTradeAmount()
+
+	if err != nil {
+		t.Error("test failed: " + err.Error())
+	}
+}
+
+// Private API
+///////////////////////////////////////////////////////////////////////////////////////////////////
 func TestBalance(t *testing.T) {
 	ClientId, ClientSecret := getSecrets()
 	n := New(ClientId, ClientSecret)
