@@ -37,3 +37,13 @@ func TestBalancesQuery(t *testing.T) {
 		gomega.BeEquivalentTo(query.Parameter{string(query.Asset), asset}),
 	))
 }
+
+func TestBalancesIsPublic(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.Balances{
+		query.NO_FILTER,
+	}
+
+	g.Expect(sut.IsPublic()).Should(gomega.BeFalse())
+}

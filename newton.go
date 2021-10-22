@@ -162,23 +162,24 @@ func (n *Newton) sign(req *http.Request) error {
 	return nil
 }
 
-// Public API
-///////////////////////////////////////////////////////////////////////////////////////////////////
-func (n *Newton) doPublicQuery(path string, method string, parameters []query.Parameter, body string) (*http.Response, error) {
+func (n *Newton) doQuery(path string, method string, parameters []query.Parameter, isPublic bool, body string) (*http.Response, error) {
 	url := baseUrl + path
 
-	req, _ := http.NewRequest(method, url, nil)
+	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
 	q := req.URL.Query()
 	for _, a := range parameters {
 		q.Add(a.Key, a.Value)
 	}
 	req.URL.RawQuery = q.Encode()
 	if method != http.MethodGet {
-		_, err := req.Body.Read([]byte(body))
+		req.Header.Add("content-type", "application/json")
+	}
+
+	if !isPublic {
+		err := n.sign(req)
 		if err != nil {
 			return nil, err
 		}
-		req.Header.Add("content-type", "application/json")
 	}
 
 	res, err := http.DefaultClient.Do(req)
@@ -186,11 +187,7 @@ func (n *Newton) doPublicQuery(path string, method string, parameters []query.Pa
 	return res, err
 }
 
-func (n *Newton) GetTickSizes() (*GetTickSizesResp, error) {
-	res, err := n.doPublicQuery("/order/tick-sizes", http.MethodGet, []query.Parameter{}, "")
-	if err != nil {
-		return nil, err
-	}
+func (n *Newton) parseResponse(res *http.Response) ([]byte, error) {
 	defer func() {
 		err := res.Body.Close()
 		if err != nil {
@@ -201,7 +198,31 @@ func (n *Newton) GetTickSizes() (*GetTickSizesResp, error) {
 		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
 	}
 
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New(fmt.Sprintf("request failed :: %d :: %s", res.StatusCode, body))
+	}
+
+	return body, nil
+}
+
+// Public API
+///////////////////////////////////////////////////////////////////////////////////////////////////
+func (n *Newton) GetTickSizes() (*GetTickSizesResp, error) {
+	res, err := n.doQuery("/order/tick-sizes", http.MethodGet, []query.Parameter{}, true, "")
+	if err != nil {
+		return nil, err
+	}
+	
+	body, err := n.parseResponse(res)
+	if err != nil {
+		return nil, err
+	}
 
 	var resp GetTickSizesResp
 	err = json.Unmarshal(body, &resp.Ticks)
@@ -213,21 +234,15 @@ func (n *Newton) GetTickSizes() (*GetTickSizesResp, error) {
 }
 
 func (n *Newton) GetMaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
-	res, err := n.doPublicQuery("/order/maximums", http.MethodGet, []query.Parameter{}, "")
+	res, err := n.doQuery("/order/maximums", http.MethodGet, []query.Parameter{}, true, "")
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
-	}
 
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := n.parseResponse(res)
+	if err != nil {
+		return nil, err
+	}
 
 	var resp GetMaxTradeAmountsResp
 	err = json.Unmarshal(body, &resp.TradeAmounts)
@@ -239,21 +254,15 @@ func (n *Newton) GetMaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
 }
 
 func (n *Newton) GetApplicableFees() (*GetApplicableFeesResp, error) {
-	res, err := n.doPublicQuery("/fees", http.MethodGet, []query.Parameter{}, "")
+	res, err := n.doQuery("/fees", http.MethodGet, []query.Parameter{}, true, "")
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
-	}
 
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := n.parseResponse(res)
+	if err != nil {
+		return nil, err
+	}
 
 	var resp GetApplicableFeesResp
 	err = json.Unmarshal(body, &resp.Fees)
@@ -265,21 +274,15 @@ func (n *Newton) GetApplicableFees() (*GetApplicableFeesResp, error) {
 }
 
 func (n *Newton) GetSymbols(query query.Query) (*GetSymbolsResp, error) {
-	res, err := n.doPublicQuery("/symbols", http.MethodGet, query.GetParameters(), "")
+	res, err := n.doQuery("/symbols", http.MethodGet, query.GetParameters(), true, "")
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
-	}
 
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := n.parseResponse(res)
+	if err != nil {
+		return nil, err
+	}
 
 	var resp GetSymbolsResp
 	err = json.Unmarshal(body, &resp.Symbols)
@@ -291,16 +294,11 @@ func (n *Newton) GetSymbols(query query.Query) (*GetSymbolsResp, error) {
 }
 
 func (n *Newton) HealthCheck() error {
-	res, err := n.doPublicQuery("/symbols", http.MethodGet, []query.Parameter{}, "")
+	res, err := n.doQuery("/symbols", http.MethodGet, []query.Parameter{}, true, "")
 	if err != nil {
 		return err
 	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
+
 	if res.StatusCode != http.StatusOK {
 		return errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
 	}
@@ -309,21 +307,15 @@ func (n *Newton) HealthCheck() error {
 }
 
 func (n *Newton) GetMinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
-	res, err := n.doPublicQuery("/order/minimums", http.MethodGet, []query.Parameter{}, "")
+	res, err := n.doQuery("/order/minimums", http.MethodGet, []query.Parameter{}, true, "")
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
-	}
 
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := n.parseResponse(res)
+	if err != nil {
+		return nil, err
+	}
 
 	var resp GetMinTradeAmountsResp
 	err = json.Unmarshal(body, &resp.TradeAmounts)
@@ -336,43 +328,16 @@ func (n *Newton) GetMinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
 
 // Private API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-func (n *Newton) doPrivateQuery(path string, method string, parameters []query.Parameter, body string) (*http.Response, error) {
-	url := baseUrl + path
-
-	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
-	q := req.URL.Query()
-	for _, a := range parameters {
-		q.Add(a.Key, a.Value)
-	}
-	req.URL.RawQuery = q.Encode()
-	if method != http.MethodGet {
-		req.Header.Add("content-type", "application/json")
-	}
-	err := n.sign(req)
-	if err != nil {
-		return nil, err
-	}
-	res, err := http.DefaultClient.Do(req)
-
-	return res, err
-}
-
 func (n *Newton) Balances(query query.Query) (*BalancesResp, error) {
-	res, err := n.doPrivateQuery("/balances", http.MethodGet, query.GetParameters(), "")
+	res, err := n.doQuery("/balances", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
-	}
 
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := n.parseResponse(res)
+	if err != nil {
+		return nil, err
+	}
 
 	var b BalancesResp
 	err = json.Unmarshal(body, &b.Balances)
@@ -384,19 +349,14 @@ func (n *Newton) Balances(query query.Query) (*BalancesResp, error) {
 }
 
 func (n *Newton) Actions(query query.Query) (*ActionsResp, error) {
-	res, err := n.doPrivateQuery("/actions", http.MethodGet, query.GetParameters(), "")
+	res, err := n.doQuery("/actions", http.MethodGet, query.GetParameters(), false, "")
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	body, _ := ioutil.ReadAll(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
+
+	body, err := n.parseResponse(res)
+	if err != nil {
+		return nil, err
 	}
 
 	var r ActionsResp
@@ -409,19 +369,14 @@ func (n *Newton) Actions(query query.Query) (*ActionsResp, error) {
 }
 
 func (n *Newton) OrderHistory(query query.Query) (*OrderHistoryResp, error) {
-	res, err := n.doPrivateQuery("/order/history", http.MethodGet, query.GetParameters(), "")
+	res, err := n.doQuery("/order/history", http.MethodGet, query.GetParameters(), false, "")
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	body, _ := ioutil.ReadAll(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
+
+	body, err := n.parseResponse(res)
+	if err != nil {
+		return nil, err
 	}
 
 	var r OrderHistoryResp
@@ -434,23 +389,15 @@ func (n *Newton) OrderHistory(query query.Query) (*OrderHistoryResp, error) {
 }
 
 func (n *Newton) OpenOrders(query query.Query) (*OpenOrdersResp, error) {
-	res, err := n.doPrivateQuery("/order/history", http.MethodGet, query.GetParameters(), "")
+	res, err := n.doQuery("/order/history", http.MethodGet, query.GetParameters(), false, "")
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
 
-	body, _ := ioutil.ReadAll(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
+	body, err := n.parseResponse(res)
+	if err != nil {
+		return nil, err
 	}
-
-
 
 	var r OpenOrdersResp
 	err = json.Unmarshal(body, &r.OpenOrders)
@@ -470,22 +417,15 @@ func (n *Newton) NewOrder(orderType string, timeInForce string, side string, sym
 		return nil, err
 	}
 
-	res, err := n.doPrivateQuery("/order/new", http.MethodPost, nil, string(b))
+	res, err := n.doQuery("/order/new", http.MethodPost, nil, false, string(b))
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	if res.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(res.Body)
-		return nil, errors.New(fmt.Sprintf("request failed :: %d %s", res.StatusCode, body))
+	
+	body, err := n.parseResponse(res)
+	if err != nil {
+		return nil, err
 	}
-
-	body, _ := ioutil.ReadAll(res.Body)
 
 	var r OpenOrdersResp
 	err = json.Unmarshal(body, &r.OpenOrders)

@@ -35,3 +35,7 @@ func (arp Actions) GetParameters() []Parameter {
 
 	return params
 }
+
+func (arp Actions) IsPublic() bool {
+	return false
+}

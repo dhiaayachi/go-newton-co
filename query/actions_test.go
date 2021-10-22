@@ -55,3 +55,17 @@ func TestActionsQuery(t *testing.T) {
 		gomega.BeEquivalentTo(query.Parameter{string(query.EndDate), strconv.FormatInt(endTime, 10)}) ,
 	))
 }
+
+func TestActionsIsPublic(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.Actions{
+		query.ActionType(query.NO_FILTER),
+		int(query.ANY),
+		int(query.ANY),
+		int64(query.ANY),
+		int64(query.ANY),
+	}
+
+	g.Expect(sut.IsPublic()).Should(gomega.BeFalse())
+}

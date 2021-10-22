@@ -40,3 +40,7 @@ func (oh OrderHistory) GetParameters() []Parameter {
 
 	return params
 }
+
+func (oh OrderHistory) IsPublic() bool {
+	return false
+}

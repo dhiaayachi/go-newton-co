@@ -30,3 +30,7 @@ func (oo OpenOrders) GetParameters() []Parameter {
 
 	return params
 }
+
+func (oo OpenOrders) IsPublic() bool {
+	return false
+}

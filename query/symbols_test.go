@@ -41,3 +41,14 @@ func TestSymbolsQuery(t *testing.T) {
 		gomega.BeEquivalentTo(query.Parameter{string(query.QuoteAsset), quoteAsset}),
 	))
 }
+
+func TestSymbolsIsPublic(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.Symbols{
+		query.NO_FILTER,
+		query.NO_FILTER,
+	}
+
+	g.Expect(sut.IsPublic()).Should(gomega.BeTrue())
+}

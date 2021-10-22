@@ -13,6 +13,7 @@ func getSecrets() (string, string) {
 	return os.Getenv("CLIENT_ID"), os.Getenv("CLIENT_SECRET")
 }
 
+
 // Public API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 func TestGetTickSizes(t *testing.T) {

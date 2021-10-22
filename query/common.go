@@ -44,4 +44,5 @@ type Parameter struct {
 
 type Query interface {
 	GetParameters() []Parameter
+	IsPublic() bool
 }

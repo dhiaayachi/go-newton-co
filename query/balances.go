@@ -13,3 +13,7 @@ func (b Balances) GetParameters() []Parameter {
 
 	return params
 }
+
+func (b Balances) IsPublic() bool {
+	return false
+}

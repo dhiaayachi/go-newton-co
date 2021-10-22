@@ -50,3 +50,16 @@ func TestOpenOrdersQuery(t *testing.T) {
 		gomega.BeEquivalentTo(query.Parameter{string(query.TimeInForce), string(timeInForce)}),
 	))
 }
+
+func TestOpenOrdersIsPublic(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.OpenOrders{
+		query.ANY,
+		query.ANY,
+		query.NO_FILTER,
+		query.NO_FILTER_VALUE,
+	}
+
+	g.Expect(sut.IsPublic()).Should(gomega.BeFalse())
+}

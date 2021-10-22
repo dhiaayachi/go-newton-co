@@ -17,3 +17,7 @@ func (s Symbols) GetParameters() []Parameter {
 
 	return params
 }
+
+func (s Symbols) IsPublic() bool {
+	return true
+}

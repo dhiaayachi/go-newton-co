@@ -59,3 +59,18 @@ func TestOrdersHistoryQuery(t *testing.T) {
 		gomega.BeEquivalentTo(query.Parameter{string(query.TimeInForce), string(timeInForce)}),
 	))
 }
+
+func TestOrderHistoryIsPublic(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.OrderHistory{
+		query.ANY,
+		query.ANY,
+		int64(query.ANY),
+		int64(query.ANY),
+		query.NO_FILTER,
+		query.NO_FILTER_VALUE,
+	}
+
+	g.Expect(sut.IsPublic()).Should(gomega.BeFalse())
+}
