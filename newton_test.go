@@ -4,6 +4,9 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	"github.com/dhiaayachi/go-newton-co/query"
+	"github.com/onsi/gomega"
 )
 
 func getSecrets() (string, string) {
@@ -13,113 +16,168 @@ func getSecrets() (string, string) {
 // Public API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 func TestGetTickSizes(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
 	ClientId, ClientSecret := getSecrets()
-	n := New(ClientId, ClientSecret)
+	sut := New(ClientId, ClientSecret)
 
-	_, err := n.GetTickSizes()
+	_, err := sut.GetTickSizes()
 
-	if err != nil {
-		t.Error("test failed: " + err.Error())
-	}
+	g.Expect(err).Should(gomega.BeNil())
 }
 
 func TestGetMaximumTradeAmounts(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
 	ClientId, ClientSecret := getSecrets()
-	n := New(ClientId, ClientSecret)
+	sut := New(ClientId, ClientSecret)
 
-	_, err := n.GetMaximumTradeAmounts()
+	_, err := sut.GetMaximumTradeAmounts()
 
-	if err != nil {
-		t.Error("test failed: " + err.Error())
-	}
+	g.Expect(err).Should(gomega.BeNil())
 }
 
 func TestGetApplicableFees(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
 	ClientId, ClientSecret := getSecrets()
-	n := New(ClientId, ClientSecret)
+	sut := New(ClientId, ClientSecret)
 
-	_, err := n.GetApplicableFees()
+	_, err := sut.GetApplicableFees()
 
-	if err != nil {
-		t.Error("test failed: " + err.Error())
-	}
+	g.Expect(err).Should(gomega.BeNil())
 }
 
 func TestSymbolsNoQuery(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
 	ClientId, ClientSecret := getSecrets()
-	n := New(ClientId, ClientSecret)
+	sut := New(ClientId, ClientSecret)
 
-	_, err := n.GetSymbols("", "")
+	_, err := sut.GetSymbols("", "")
 
-	if err != nil {
-		t.Error("test failed: " + err.Error())
-	}
+	g.Expect(err).Should(gomega.BeNil())
 }
 
 func TestHealthCheck(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
 	ClientId, ClientSecret := getSecrets()
-	n := New(ClientId, ClientSecret)
+	sut := New(ClientId, ClientSecret)
 
-	err := n.HealthCheck()
+	err := sut.HealthCheck()
 
-	if err != nil {
-		t.Error("test failed: " + err.Error())
-	}
+	g.Expect(err).Should(gomega.BeNil())
 }
 
 func TestGetMinTradeAmounts(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
 	ClientId, ClientSecret := getSecrets()
-	n := New(ClientId, ClientSecret)
+	sut := New(ClientId, ClientSecret)
 
-	_, err := n.GetMinimumTradeAmount()
+	_, err := sut.GetMinimumTradeAmount()
 
-	if err != nil {
-		t.Error("test failed: " + err.Error())
-	}
+	g.Expect(err).Should(gomega.BeNil())
 }
 
 // Private API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-func TestBalance(t *testing.T) {
+func TestBalances(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
 	ClientId, ClientSecret := getSecrets()
-	n := New(ClientId, ClientSecret)
+	sut := New(ClientId, ClientSecret)
 
-	_, err := n.Balances("BTC")
+	q := &query.Balances{Asset: "BTC"}
+	_, err := sut.Balances(q)
 
-	if err != nil {
-		t.Error("test failed: " + err.Error())
-	}
+	g.Expect(err).Should(gomega.BeNil())
 }
 
-func TestAction(t *testing.T) {
+func TestBalancesNoFilter(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
 	ClientId, ClientSecret := getSecrets()
-	n := New(ClientId, ClientSecret)
+	sut := New(ClientId, ClientSecret)
 
-	_, err := n.Actions(DEPOSIT, 1, 0, time.Date(2020, 01, 01, 00, 00, 00, 00, time.Local).Unix(), time.Date(2020, 01, 02, 00, 00, 00, 00, time.Local).Unix())
+	q := &query.Balances{Asset: query.NO_FILTER}
+	_, err := sut.Balances(q)
 
-	if err != nil {
-		t.Error("test failed: " + err.Error())
+	g.Expect(err).Should(gomega.BeNil())
+}
+
+func TestActions(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	ClientId, ClientSecret := getSecrets()
+	sut := New(ClientId, ClientSecret)
+
+	q := &query.Actions{
+		ActionType: query.DEPOSIT,
+		Limit:      1,
+		Offset:     0,
+		StartDate:  time.Date(2020, 01, 01, 00, 00, 00, 00, time.Local).Unix(),
+		EndDate:    time.Date(2020, 01, 02, 00, 00, 00, 00, time.Local).Unix(),
 	}
+
+	_, err := sut.Actions(q)
+
+	g.Expect(err).Should(gomega.BeNil())
+}
+
+func TestActionsNoFilter(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	ClientId, ClientSecret := getSecrets()
+	sut := New(ClientId, ClientSecret)
+
+	req := &query.Actions{
+		ActionType: query.ActionType(query.NO_FILTER),
+		Limit:      int(query.ANY),
+		Offset:     int(query.ANY),
+		StartDate:  int64(query.ANY),
+		EndDate:    int64(query.ANY),
+	}
+
+	_, err := sut.Actions(req)
+
+	g.Expect(err).Should(gomega.BeNil())
 }
 
 func TestOrderHistory(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
 	ClientId, ClientSecret := getSecrets()
-	n := New(ClientId, ClientSecret)
+	sut := New(ClientId, ClientSecret)
 
-	_, err := n.OrdersHistory(1, 0, time.Date(2020, 01, 01, 00, 00, 00, 00, time.Local).Unix(), time.Date(2020, 01, 01, 01, 00, 00, 00, time.Local).Unix(), "", "")
-
-	if err != nil {
-		t.Error("test failed: " + err.Error())
+	q := &query.OrderHistory{
+		Limit: 1, 
+		Offset: 0,
+		StartDate: time.Date(2020, 01, 01, 00, 00, 00, 00, time.Local).Unix(),
+		EndDate: time.Date(2020, 01, 01, 01, 00, 00, 00, time.Local).Unix(),
+		Symbol: "BTC_USDC",
+		TimeInForce: "IOC",
 	}
+
+	_, err := sut.OrderHistory(q)
+
+	g.Expect(err).Should(gomega.BeNil())
 }
 
 func TestOpenOrders(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
 	ClientId, ClientSecret := getSecrets()
-	n := New(ClientId, ClientSecret)
+	sut := New(ClientId, ClientSecret)
 
-	_, err := n.OpenOrders(1, 0, "", "")
+	q := &query.OpenOrders{
+		Limit:       1,
+		Offset:      0,
+		Symbol:      "BTC_USDC",
+		TimeInForce: "IOC"}
 
-	if err != nil {
-		t.Error("test failed: " + err.Error())
-	}
+	_, err := sut.OpenOrders(q)
+
+	g.Expect(err).Should(gomega.BeNil())
 }

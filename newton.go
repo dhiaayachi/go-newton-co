@@ -14,26 +14,15 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/dhiaayachi/go-newton-co/query"
 )
 
 const baseUrl = "https://api.newton.co/v1"
 
-type ActionType string
-
-const (
-	DEPOSIT    ActionType = "DEPOSIT"
-	WITHDRAWAL ActionType = "WITHDRAWAL"
-	TRANSACT   ActionType = "TRANSACT"
-)
-
 type Newton struct {
 	clientId     string
 	clientSecret string
-}
-
-type Args struct {
-	Key   string
-	Value string
 }
 
 type NewOrderReq struct {
@@ -90,7 +79,7 @@ type OpenOrdersResp struct {
 	}
 }
 
-type OrdersHistoryResp struct {
+type OrderHistoryResp struct {
 	OrdersHistory []struct {
 		OrderID      string    `json:"order_id"`
 		Symbol       string    `json:"symbol"`
@@ -175,7 +164,7 @@ func (n *Newton) sign(req *http.Request) error {
 
 // Public API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-func (n *Newton) doPublicQuery(path string, method string, args []Args, body string) (*http.Response, error) {
+func (n *Newton) doPublicQuery(path string, method string, args []query.Parameter, body string) (*http.Response, error) {
 	url := baseUrl + path
 
 	req, _ := http.NewRequest(method, url, nil)
@@ -198,7 +187,7 @@ func (n *Newton) doPublicQuery(path string, method string, args []Args, body str
 }
 
 func (n *Newton) GetTickSizes() (*GetTickSizesResp, error) {
-	res, err := n.doPublicQuery("/order/tick-sizes", http.MethodGet, []Args{}, "")
+	res, err := n.doPublicQuery("/order/tick-sizes", http.MethodGet, []query.Parameter{}, "")
 	if err != nil {
 		return nil, err
 	}
@@ -224,7 +213,7 @@ func (n *Newton) GetTickSizes() (*GetTickSizesResp, error) {
 }
 
 func (n *Newton) GetMaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
-	res, err := n.doPublicQuery("/order/maximums", http.MethodGet, []Args{}, "")
+	res, err := n.doPublicQuery("/order/maximums", http.MethodGet, []query.Parameter{}, "")
 	if err != nil {
 		return nil, err
 	}
@@ -250,7 +239,7 @@ func (n *Newton) GetMaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
 }
 
 func (n *Newton) GetApplicableFees() (*GetApplicableFeesResp, error) {
-	res, err := n.doPublicQuery("/fees", http.MethodGet, []Args{}, "")
+	res, err := n.doPublicQuery("/fees", http.MethodGet, []query.Parameter{}, "")
 	if err != nil {
 		return nil, err
 	}
@@ -276,13 +265,13 @@ func (n *Newton) GetApplicableFees() (*GetApplicableFeesResp, error) {
 }
 
 func (n *Newton) GetSymbols(baseAsset, quoteAsset string) (*GetSymbolsResp, error) {
-	args := []Args{}
+	args := []query.Parameter{}
 	if baseAsset != "" {
-		args = append(args, Args{Key: "base_asset", Value: baseAsset})
+		args = append(args, query.Parameter{Key: "base_asset", Value: baseAsset})
 	}
 
 	if quoteAsset != "" {
-		args = append(args, Args{Key: "quote_asset", Value: quoteAsset})
+		args = append(args, query.Parameter{Key: "quote_asset", Value: quoteAsset})
 	}
 
 	res, err := n.doPublicQuery("/symbols", http.MethodGet, args, "")
@@ -311,7 +300,7 @@ func (n *Newton) GetSymbols(baseAsset, quoteAsset string) (*GetSymbolsResp, erro
 }
 
 func (n *Newton) HealthCheck() error {
-	res, err := n.doPublicQuery("/symbols", http.MethodGet, []Args{}, "")
+	res, err := n.doPublicQuery("/symbols", http.MethodGet, []query.Parameter{}, "")
 	if err != nil {
 		return err
 	}
@@ -329,7 +318,7 @@ func (n *Newton) HealthCheck() error {
 }
 
 func (n *Newton) GetMinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
-	res, err := n.doPublicQuery("/order/minimums", http.MethodGet, []Args{}, "")
+	res, err := n.doPublicQuery("/order/minimums", http.MethodGet, []query.Parameter{}, "")
 	if err != nil {
 		return nil, err
 	}
@@ -356,12 +345,12 @@ func (n *Newton) GetMinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
 
 // Private API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-func (n *Newton) doPrivateQuery(path string, method string, args []Args, body string) (*http.Response, error) {
+func (n *Newton) doPrivateQuery(path string, method string, parameters []query.Parameter, body string) (*http.Response, error) {
 	url := baseUrl + path
 
 	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
 	q := req.URL.Query()
-	for _, a := range args {
+	for _, a := range parameters {
 		q.Add(a.Key, a.Value)
 	}
 	req.URL.RawQuery = q.Encode()
@@ -377,13 +366,8 @@ func (n *Newton) doPrivateQuery(path string, method string, args []Args, body st
 	return res, err
 }
 
-func (n *Newton) Balances(asset string) (*BalancesResp, error) {
-
-	a := make([]Args, 1)
-
-	a[0].Key = "asset"
-	a[0].Value = asset
-	res, err := n.doPrivateQuery("/balances", http.MethodGet, a, "")
+func (n *Newton) Balances(query *query.Balances) (*BalancesResp, error) {
+	res, err := n.doPrivateQuery("/balances", http.MethodGet, query.GetParameters(), "")
 	if err != nil {
 		return nil, err
 	}
@@ -408,26 +392,8 @@ func (n *Newton) Balances(asset string) (*BalancesResp, error) {
 	return &b, nil
 }
 
-func (n *Newton) Actions(actionType ActionType, limit int, offset int, startDate int64, endDate int64) (*ActionsResp, error) {
-
-	a := make([]Args, 5)
-
-	a[0].Key = "action_type"
-	a[0].Value = string(actionType)
-
-	a[1].Key = "end_date"
-	a[1].Value = strconv.FormatInt(endDate, 10)
-
-	a[2].Key = "limit"
-	a[2].Value = strconv.Itoa(limit)
-
-	a[3].Key = "offset"
-	a[3].Value = strconv.Itoa(offset)
-
-	a[4].Key = "start_date"
-	a[4].Value = strconv.FormatInt(startDate, 10)
-
-	res, err := n.doPrivateQuery("/actions", http.MethodGet, a, "")
+func (n *Newton) Actions(query *query.Actions) (*ActionsResp, error) {
+	res, err := n.doPrivateQuery("/actions", http.MethodGet, query.GetParameters(), "")
 	if err != nil {
 		return nil, err
 	}
@@ -451,29 +417,8 @@ func (n *Newton) Actions(actionType ActionType, limit int, offset int, startDate
 	return &r, nil
 }
 
-func (n *Newton) OrdersHistory(limit int, offset int, startDate int64, endDate int64, symbol string, timeInForce string) (*OrdersHistoryResp, error) {
-
-	a := make([]Args, 10)
-
-	a[1].Key = "end_date"
-	a[1].Value = strconv.FormatInt(endDate, 10)
-
-	a[2].Key = "limit"
-	a[2].Value = strconv.Itoa(limit)
-
-	a[3].Key = "offset"
-	a[3].Value = strconv.Itoa(offset)
-
-	a[4].Key = "start_date"
-	a[4].Value = strconv.FormatInt(startDate, 10)
-
-	a[5].Key = "symbol"
-	a[5].Value = symbol
-
-	a[6].Key = "time_in_force"
-	a[6].Value = timeInForce
-
-	res, err := n.doPrivateQuery("/order/history", http.MethodGet, a, "")
+func (n *Newton) OrderHistory(query *query.OrderHistory) (*OrderHistoryResp, error) {
+	res, err := n.doPrivateQuery("/order/history", http.MethodGet, query.GetParameters(), "")
 	if err != nil {
 		return nil, err
 	}
@@ -488,7 +433,7 @@ func (n *Newton) OrdersHistory(limit int, offset int, startDate int64, endDate i
 		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
 	}
 
-	var r OrdersHistoryResp
+	var r OrderHistoryResp
 	err = json.Unmarshal(body, &r.OrdersHistory)
 	if err != nil {
 		return nil, err
@@ -497,23 +442,8 @@ func (n *Newton) OrdersHistory(limit int, offset int, startDate int64, endDate i
 	return &r, nil
 }
 
-func (n *Newton) OpenOrders(limit int, offset int, symbol string, timeInForce string) (*OpenOrdersResp, error) {
-
-	a := make([]Args, 10)
-
-	a[1].Key = "limit"
-	a[1].Value = strconv.Itoa(limit)
-
-	a[2].Key = "offset"
-	a[2].Value = strconv.Itoa(offset)
-
-	a[3].Key = "symbol"
-	a[3].Value = symbol
-
-	a[4].Key = "time_in_force"
-	a[4].Value = timeInForce
-
-	res, err := n.doPrivateQuery("/order/history", http.MethodGet, a, "")
+func (n *Newton) OpenOrders(query *query.OpenOrders) (*OpenOrdersResp, error) {
+	res, err := n.doPrivateQuery("/order/history", http.MethodGet, query.GetParameters(), "")
 	if err != nil {
 		return nil, err
 	}
@@ -523,11 +453,13 @@ func (n *Newton) OpenOrders(limit int, offset int, symbol string, timeInForce st
 			log.Printf("error:%s", err.Error())
 		}
 	}()
+
+	body, _ := ioutil.ReadAll(res.Body)
 	if res.StatusCode != http.StatusOK {
 		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
 	}
 
-	body, _ := ioutil.ReadAll(res.Body)
+
 
 	var r OpenOrdersResp
 	err = json.Unmarshal(body, &r.OpenOrders)
