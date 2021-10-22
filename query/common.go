@@ -19,6 +19,8 @@ const (
 	EndDate QueryParameterKey = "end_date"
 	Symbol QueryParameterKey = "symbol"
 	TimeInForce QueryParameterKey = "time_in_force"
+	BaseAsset = "base_asset"
+	QuoteAsset = "quote_asset"
 )
 
 type TimeInForceAllowedValue string
@@ -41,5 +43,5 @@ type Parameter struct {
 }
 
 type Query interface {
-	Parameters() []Parameter
+	GetParameters() []Parameter
 }

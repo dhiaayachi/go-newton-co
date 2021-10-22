@@ -54,7 +54,28 @@ func TestSymbolsNoQuery(t *testing.T) {
 	ClientId, ClientSecret := getSecrets()
 	sut := New(ClientId, ClientSecret)
 
-	_, err := sut.GetSymbols("", "")
+	q := &query.Symbols{
+		BaseAsset: query.NO_FILTER,
+		QuoteAsset: query.NO_FILTER,
+	}
+
+	_, err := sut.GetSymbols(q)
+
+	g.Expect(err).Should(gomega.BeNil())
+}
+
+func TestSymbolsWithQuery(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	ClientId, ClientSecret := getSecrets()
+	sut := New(ClientId, ClientSecret)
+
+	q := &query.Symbols{
+		BaseAsset: "BTC",
+		QuoteAsset: "ETH",
+	}
+
+	_, err := sut.GetSymbols(q)
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -95,7 +116,7 @@ func TestBalances(t *testing.T) {
 	g.Expect(err).Should(gomega.BeNil())
 }
 
-func TestBalancesNoFilter(t *testing.T) {
+func TestBalancesNoQuery(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	ClientId, ClientSecret := getSecrets()
@@ -126,7 +147,7 @@ func TestActions(t *testing.T) {
 	g.Expect(err).Should(gomega.BeNil())
 }
 
-func TestActionsNoFilter(t *testing.T) {
+func TestActionsNoQuery(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	ClientId, ClientSecret := getSecrets()

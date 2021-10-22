@@ -7,7 +7,7 @@ type Balances struct {
 func (b Balances) GetParameters() []Parameter {
 	params := make([]Parameter, 0)
 
-	if b.Asset != "" {
+	if b.Asset != NO_FILTER {
 		params = append(params, Parameter{string(Asset), b.Asset})
 	}
 

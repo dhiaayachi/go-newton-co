@@ -164,12 +164,12 @@ func (n *Newton) sign(req *http.Request) error {
 
 // Public API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-func (n *Newton) doPublicQuery(path string, method string, args []query.Parameter, body string) (*http.Response, error) {
+func (n *Newton) doPublicQuery(path string, method string, parameters []query.Parameter, body string) (*http.Response, error) {
 	url := baseUrl + path
 
 	req, _ := http.NewRequest(method, url, nil)
 	q := req.URL.Query()
-	for _, a := range args {
+	for _, a := range parameters {
 		q.Add(a.Key, a.Value)
 	}
 	req.URL.RawQuery = q.Encode()
@@ -264,17 +264,8 @@ func (n *Newton) GetApplicableFees() (*GetApplicableFeesResp, error) {
 	return &resp, nil
 }
 
-func (n *Newton) GetSymbols(baseAsset, quoteAsset string) (*GetSymbolsResp, error) {
-	args := []query.Parameter{}
-	if baseAsset != "" {
-		args = append(args, query.Parameter{Key: "base_asset", Value: baseAsset})
-	}
-
-	if quoteAsset != "" {
-		args = append(args, query.Parameter{Key: "quote_asset", Value: quoteAsset})
-	}
-
-	res, err := n.doPublicQuery("/symbols", http.MethodGet, args, "")
+func (n *Newton) GetSymbols(query query.Query) (*GetSymbolsResp, error) {
+	res, err := n.doPublicQuery("/symbols", http.MethodGet, query.GetParameters(), "")
 	if err != nil {
 		return nil, err
 	}
@@ -366,7 +357,7 @@ func (n *Newton) doPrivateQuery(path string, method string, parameters []query.P
 	return res, err
 }
 
-func (n *Newton) Balances(query *query.Balances) (*BalancesResp, error) {
+func (n *Newton) Balances(query query.Query) (*BalancesResp, error) {
 	res, err := n.doPrivateQuery("/balances", http.MethodGet, query.GetParameters(), "")
 	if err != nil {
 		return nil, err
@@ -392,7 +383,7 @@ func (n *Newton) Balances(query *query.Balances) (*BalancesResp, error) {
 	return &b, nil
 }
 
-func (n *Newton) Actions(query *query.Actions) (*ActionsResp, error) {
+func (n *Newton) Actions(query query.Query) (*ActionsResp, error) {
 	res, err := n.doPrivateQuery("/actions", http.MethodGet, query.GetParameters(), "")
 	if err != nil {
 		return nil, err
@@ -417,7 +408,7 @@ func (n *Newton) Actions(query *query.Actions) (*ActionsResp, error) {
 	return &r, nil
 }
 
-func (n *Newton) OrderHistory(query *query.OrderHistory) (*OrderHistoryResp, error) {
+func (n *Newton) OrderHistory(query query.Query) (*OrderHistoryResp, error) {
 	res, err := n.doPrivateQuery("/order/history", http.MethodGet, query.GetParameters(), "")
 	if err != nil {
 		return nil, err
@@ -442,7 +433,7 @@ func (n *Newton) OrderHistory(query *query.OrderHistory) (*OrderHistoryResp, err
 	return &r, nil
 }
 
-func (n *Newton) OpenOrders(query *query.OpenOrders) (*OpenOrdersResp, error) {
+func (n *Newton) OpenOrders(query query.Query) (*OpenOrdersResp, error) {
 	res, err := n.doPrivateQuery("/order/history", http.MethodGet, query.GetParameters(), "")
 	if err != nil {
 		return nil, err
