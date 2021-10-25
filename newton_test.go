@@ -1,7 +1,6 @@
 package newton
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -10,7 +9,7 @@ import (
 )
 
 func getSecrets() (string, string) {
-	return os.Getenv("CLIENT_ID"), os.Getenv("CLIENT_SECRET")
+	return "0198ab98-0475-437e-a4e6-5594398e5562", "220eeda0-e216-45f2-9d3b-e52b1ea90e7b"
 }
 
 
