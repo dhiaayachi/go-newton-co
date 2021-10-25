@@ -8,6 +8,14 @@ import (
 	"github.com/onsi/gomega"
 )
 
+func TestHealthCheckGetBody(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.HealthCheck{}
+	
+	g.Expect(sut.GetBody()).Should(gomega.BeNil())
+}
+
 func TestHealthCheckGetParameters(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 

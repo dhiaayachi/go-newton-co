@@ -10,32 +10,36 @@ type Actions struct {
 	EndDate int64
 }
 
-func (arp Actions) GetParameters() []Parameter {
+func (a Actions) GetBody() interface{} {
+	return nil
+}
+
+func (a Actions) GetParameters() []Parameter {
 	params := make([]Parameter, 0)
 
-	if arp.ActionType != ActionType(NO_FILTER) {
-		params = append(params, Parameter{string(ActionTypeKey), string(arp.ActionType)})
+	if a.ActionType != ActionType(NO_FILTER) {
+		params = append(params, Parameter{string(ActionTypeKey), string(a.ActionType)})
 	}
 
-	if arp.Limit != int(ANY) {
-		params = append(params, Parameter{string(Limit), strconv.Itoa(arp.Limit)})
+	if a.Limit != int(ANY) {
+		params = append(params, Parameter{string(Limit), strconv.Itoa(a.Limit)})
 	}
 
-	if arp.Offset != int(ANY) {
-		params = append(params, Parameter{string(Offset), strconv.Itoa(arp.Offset)})
+	if a.Offset != int(ANY) {
+		params = append(params, Parameter{string(Offset), strconv.Itoa(a.Offset)})
 	}
 
-	if arp.StartDate != int64(ANY) {
-		params = append(params, Parameter{string(StartDate), strconv.FormatInt(arp.StartDate, 10)})
+	if a.StartDate != int64(ANY) {
+		params = append(params, Parameter{string(StartDate), strconv.FormatInt(a.StartDate, 10)})
 	}
 
-	if arp.EndDate != int64(ANY) {
-		params = append(params, Parameter{string(EndDate), strconv.FormatInt(arp.EndDate, 10)})
+	if a.EndDate != int64(ANY) {
+		params = append(params, Parameter{string(EndDate), strconv.FormatInt(a.EndDate, 10)})
 	}
 
 	return params
 }
 
-func (arp Actions) IsPublic() bool {
+func (a Actions) IsPublic() bool {
 	return false
 }

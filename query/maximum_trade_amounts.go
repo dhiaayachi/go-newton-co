@@ -3,6 +3,10 @@ package query
 type MaximumTradeAmounts struct {
 }
 
+func (mta MaximumTradeAmounts) GetBody() interface{} {
+	return nil
+}
+
 func (mta MaximumTradeAmounts) GetParameters() []Parameter {
 	return []Parameter{}
 }

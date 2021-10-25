@@ -4,6 +4,10 @@ type Balances struct {
 	Asset string
 }
 
+func (b Balances) GetBody() interface{} {
+	return nil
+}
+
 func (b Balances) GetParameters() []Parameter {
 	params := make([]Parameter, 0)
 

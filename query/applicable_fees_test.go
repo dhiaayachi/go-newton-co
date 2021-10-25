@@ -8,6 +8,14 @@ import (
 	"github.com/onsi/gomega"
 )
 
+func TestApplicableFeesGetBody(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.ApplicableFees{}
+
+	g.Expect(sut.GetBody()).Should(gomega.BeNil())
+}
+
 func TestApplicableFeesGetParameters(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 

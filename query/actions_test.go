@@ -10,6 +10,20 @@ import (
 	"github.com/onsi/gomega"
 )
 
+func TestActionsGetBody(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.Actions{
+		query.ActionType(query.NO_FILTER),
+		int(query.ANY),
+		int(query.ANY),
+		int64(query.ANY),
+		int64(query.ANY),
+	}
+
+	g.Expect(sut.GetBody()).Should(gomega.BeNil())
+}
+
 func TestActionsGetParametersNoFilter(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 

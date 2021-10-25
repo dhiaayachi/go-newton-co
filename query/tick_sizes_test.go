@@ -8,6 +8,14 @@ import (
 	"github.com/onsi/gomega"
 )
 
+func TestTickSizesGetBody(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.TickSizes{}
+	
+	g.Expect(sut.GetBody()).Should(gomega.BeNil())
+}
+
 func TestTickSizesGetParameters(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 

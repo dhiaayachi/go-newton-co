@@ -8,6 +8,20 @@ import (
 	"github.com/onsi/gomega"
 )
 
+func TestSymbolsGetBody(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	baseAsset := "BTC"
+	quoteAsset := "ETH"
+
+	sut := &query.Symbols{
+		baseAsset,
+		quoteAsset,
+	}
+	
+	g.Expect(sut.GetBody()).Should(gomega.BeNil())
+}
+
 func TestSymbolsGetParametersNoFilter(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 

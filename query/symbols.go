@@ -4,6 +4,10 @@ type Symbols struct {
 	BaseAsset, QuoteAsset string
 }
 
+func (s Symbols) GetBody() interface{} {
+	return nil
+}
+
 func (s Symbols) GetParameters() []Parameter {
 	params := make([]Parameter, 0)
 

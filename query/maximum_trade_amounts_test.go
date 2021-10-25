@@ -8,6 +8,14 @@ import (
 	"github.com/onsi/gomega"
 )
 
+func TestMaximumTradeAmountsGetBody(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.MaximumTradeAmounts{}
+	
+	g.Expect(sut.GetBody()).Should(gomega.BeNil())
+}
+
 func TestMaximumTradeAmountsGetParameters(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 

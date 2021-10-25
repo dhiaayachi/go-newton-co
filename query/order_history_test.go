@@ -10,6 +10,28 @@ import (
 	"github.com/onsi/gomega"
 )
 
+func TestOrderHistoryGetBody(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	limit := 1
+	offset := 0
+	startDate := time.Now().Unix()
+	endDate := startDate + 1
+	symbol := "BTC_USDC"
+	timeInForce := query.IOC
+
+	sut := &query.OrderHistory{
+		limit,
+		offset,
+		startDate,
+		endDate,
+		symbol,
+		timeInForce,
+	}
+	
+	g.Expect(sut.GetBody()).Should(gomega.BeNil())
+}
+
 func TestOrdersHistoryGetParametersNoFilter(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 

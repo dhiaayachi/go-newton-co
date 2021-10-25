@@ -43,6 +43,7 @@ type Parameter struct {
 }
 
 type Query interface {
+	GetBody() interface{}
 	GetParameters() []Parameter
 	IsPublic() bool
 }

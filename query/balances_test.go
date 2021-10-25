@@ -8,6 +8,18 @@ import (
 	"github.com/onsi/gomega"
 )
 
+func TestBalancesGetBody(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	asset := "BTC"
+
+	sut := &query.Balances{
+		asset,
+	}
+
+	g.Expect(sut.GetBody()).Should(gomega.BeNil())
+}
+
 func TestBalancesGetParametersNoFilter(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 

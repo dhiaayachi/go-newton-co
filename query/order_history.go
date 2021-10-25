@@ -11,6 +11,10 @@ type OrderHistory struct {
 	TimeInForce TimeInForceAllowedValue
 }
 
+func (oh OrderHistory) GetBody() interface{} {
+	return nil
+}
+
 func (oh OrderHistory) GetParameters() []Parameter {
 	params := make([]Parameter, 0)
 

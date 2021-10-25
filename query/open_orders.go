@@ -9,6 +9,10 @@ type OpenOrders struct {
 	TimeInForce TimeInForceAllowedValue
 }
 
+func (oo OpenOrders) GetBody() interface{} {
+	return nil
+}
+
 func (oo OpenOrders) GetParameters() []Parameter {
 	params := make([]Parameter, 0)
 

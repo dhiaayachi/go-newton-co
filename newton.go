@@ -24,15 +24,6 @@ type Newton struct {
 	clientSecret string
 }
 
-type NewOrderReq struct {
-	OrderType   string  `json:"order_type"`
-	TimeInForce string  `json:"time_in_force"`
-	Side        string  `json:"side"`
-	Symbol      string  `json:"symbol"`
-	Price       float64 `json:"price"`
-	Quantity    float64 `json:"quantity"`
-}
-
 type GetTickSizesResp struct {
 	Ticks map[string]struct {
 		Tick float64 `json:"tick"`
@@ -310,7 +301,7 @@ func (n *Newton) HealthCheck() error {
 }
 
 func (n *Newton) MinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
-	query := &query.MinimumTradeAmount{}
+	query := &query.MinimumTradeAmounts{}
 	res, err := n.doQuery("/order/minimums", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
 	if err != nil {
 		return nil, err
@@ -353,7 +344,7 @@ func (n *Newton) Balances(query query.Query) (*BalancesResp, error) {
 }
 
 func (n *Newton) Actions(query query.Query) (*ActionsResp, error) {
-	res, err := n.doQuery("/actions", http.MethodGet, query.GetParameters(), false, "")
+	res, err := n.doQuery("/actions", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
 	if err != nil {
 		return nil, err
 	}
@@ -373,7 +364,7 @@ func (n *Newton) Actions(query query.Query) (*ActionsResp, error) {
 }
 
 func (n *Newton) OrderHistory(query query.Query) (*OrderHistoryResp, error) {
-	res, err := n.doQuery("/order/history", http.MethodGet, query.GetParameters(), false, "")
+	res, err := n.doQuery("/order/history", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
 	if err != nil {
 		return nil, err
 	}
@@ -393,7 +384,7 @@ func (n *Newton) OrderHistory(query query.Query) (*OrderHistoryResp, error) {
 }
 
 func (n *Newton) OpenOrders(query query.Query) (*OpenOrdersResp, error) {
-	res, err := n.doQuery("/order/history", http.MethodGet, query.GetParameters(), false, "")
+	res, err := n.doQuery("/order/history", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
 	if err != nil {
 		return nil, err
 	}
@@ -412,16 +403,13 @@ func (n *Newton) OpenOrders(query query.Query) (*OpenOrdersResp, error) {
 	return &r, nil
 }
 
-func (n *Newton) NewOrder(orderType string, timeInForce string, side string, symbol string, price float64, quantity float64) (*OpenOrdersResp, error) {
-
-	order := NewOrderReq{orderType, timeInForce, side, symbol, price, quantity}
-
-	b, err := json.Marshal(&order)
+func (n *Newton) NewOrder(query query.Query) (*OpenOrdersResp, error) {
+	b, err := json.Marshal(query.GetBody())
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := n.doQuery("/order/new", http.MethodPost, nil, false, string(b))
+	res, err := n.doQuery("/order/new", http.MethodPost, query.GetParameters(), query.IsPublic(), string(b))
 	if err != nil {
 		return nil, err
 	}

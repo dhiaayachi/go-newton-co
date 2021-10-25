@@ -8,10 +8,18 @@ import (
 	"github.com/onsi/gomega"
 )
 
+func TestMinimumTradeAmountsGetBody(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.MinimumTradeAmounts{}
+	
+	g.Expect(sut.GetBody()).Should(gomega.BeNil())
+}
+
 func TestMinimumTradeAmountGetParameters(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	sut := &query.MinimumTradeAmount{}
+	sut := &query.MinimumTradeAmounts{}
 
 	parameters := sut.GetParameters()
 
@@ -21,7 +29,7 @@ func TestMinimumTradeAmountGetParameters(t *testing.T) {
 func TestMinimumTradeAmountIsPublic(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	sut := &query.MinimumTradeAmount{}
+	sut := &query.MinimumTradeAmounts{}
 
 	g.Expect(sut.IsPublic()).Should(gomega.BeTrue())
 }

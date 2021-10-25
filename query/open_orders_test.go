@@ -9,6 +9,24 @@ import (
 	"github.com/onsi/gomega"
 )
 
+func TestOpenOrdersGetBody(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	limit := 1
+	offset := 0
+	symbol := "BTC_USDC"
+	timeInForce := query.IOC
+
+	sut := &query.OpenOrders{
+		limit,
+		offset,
+		symbol,
+		timeInForce,
+	}
+	
+	g.Expect(sut.GetBody()).Should(gomega.BeNil())
+}
+
 func TestOpenOrdersGetParametersNoFilter(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
