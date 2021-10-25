@@ -212,7 +212,7 @@ func (n *Newton) parseResponse(res *http.Response) ([]byte, error) {
 
 // Public API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-func (n *Newton) GetTickSizes() (*GetTickSizesResp, error) {
+func (n *Newton) TickSizes() (*GetTickSizesResp, error) {
 	res, err := n.doQuery("/order/tick-sizes", http.MethodGet, []query.Parameter{}, true, "")
 	if err != nil {
 		return nil, err
@@ -232,7 +232,7 @@ func (n *Newton) GetTickSizes() (*GetTickSizesResp, error) {
 	return &resp, nil
 }
 
-func (n *Newton) GetMaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
+func (n *Newton) MaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
 	res, err := n.doQuery("/order/maximums", http.MethodGet, []query.Parameter{}, true, "")
 	if err != nil {
 		return nil, err
@@ -252,7 +252,7 @@ func (n *Newton) GetMaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
 	return &resp, nil
 }
 
-func (n *Newton) GetApplicableFees() (*GetApplicableFeesResp, error) {
+func (n *Newton) ApplicableFees() (*GetApplicableFeesResp, error) {
 	res, err := n.doQuery("/fees", http.MethodGet, []query.Parameter{}, true, "")
 	if err != nil {
 		return nil, err
@@ -272,7 +272,7 @@ func (n *Newton) GetApplicableFees() (*GetApplicableFeesResp, error) {
 	return &resp, nil
 }
 
-func (n *Newton) GetSymbols(query query.Query) (*GetSymbolsResp, error) {
+func (n *Newton) Symbols(query query.Query) (*GetSymbolsResp, error) {
 	res, err := n.doQuery("/symbols", http.MethodGet, query.GetParameters(), true, "")
 	if err != nil {
 		return nil, err
@@ -293,7 +293,7 @@ func (n *Newton) GetSymbols(query query.Query) (*GetSymbolsResp, error) {
 }
 
 func (n *Newton) HealthCheck() error {
-	res, err := n.doQuery("/symbols", http.MethodGet, []query.Parameter{}, true, "")
+	res, err := n.doQuery("/health-check", http.MethodGet, []query.Parameter{}, true, "")
 	if err != nil {
 		return err
 	}
@@ -305,7 +305,7 @@ func (n *Newton) HealthCheck() error {
 	return nil
 }
 
-func (n *Newton) GetMinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
+func (n *Newton) MinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
 	res, err := n.doQuery("/order/minimums", http.MethodGet, []query.Parameter{}, true, "")
 	if err != nil {
 		return nil, err
