@@ -310,7 +310,8 @@ func (n *Newton) HealthCheck() error {
 }
 
 func (n *Newton) MinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
-	res, err := n.doQuery("/order/minimums", http.MethodGet, []query.Parameter{}, true, "")
+	query := &query.MinimumTradeAmount{}
+	res, err := n.doQuery("/order/minimums", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
 	if err != nil {
 		return nil, err
 	}
