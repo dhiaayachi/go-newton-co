@@ -234,7 +234,8 @@ func (n *Newton) TickSizes() (*GetTickSizesResp, error) {
 }
 
 func (n *Newton) MaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
-	res, err := n.doQuery("/order/maximums", http.MethodGet, []query.Parameter{}, true, "")
+	query := &query.MaximumTradeAmounts{}
+	res, err := n.doQuery("/order/maximums", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
 	if err != nil {
 		return nil, err
 	}
