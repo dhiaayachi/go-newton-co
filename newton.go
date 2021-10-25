@@ -213,7 +213,8 @@ func (n *Newton) parseResponse(res *http.Response) ([]byte, error) {
 // Public API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 func (n *Newton) TickSizes() (*GetTickSizesResp, error) {
-	res, err := n.doQuery("/order/tick-sizes", http.MethodGet, []query.Parameter{}, true, "")
+	query := &query.TickSizes{}
+	res, err := n.doQuery("/order/tick-sizes", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
 	if err != nil {
 		return nil, err
 	}
