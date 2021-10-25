@@ -276,7 +276,7 @@ func (n *Newton) ApplicableFees() (*GetApplicableFeesResp, error) {
 }
 
 func (n *Newton) Symbols(query query.Query) (*GetSymbolsResp, error) {
-	res, err := n.doQuery("/symbols", http.MethodGet, query.GetParameters(), true, "")
+	res, err := n.doQuery("/symbols", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
 	if err != nil {
 		return nil, err
 	}
@@ -296,7 +296,8 @@ func (n *Newton) Symbols(query query.Query) (*GetSymbolsResp, error) {
 }
 
 func (n *Newton) HealthCheck() error {
-	res, err := n.doQuery("/health-check", http.MethodGet, []query.Parameter{}, true, "")
+	query := &query.HealthCheck{}
+	res, err := n.doQuery("/health-check", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
 	if err != nil {
 		return err
 	}
