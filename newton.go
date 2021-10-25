@@ -152,22 +152,22 @@ func (n *Newton) sign(req *http.Request) error {
 	return nil
 }
 
-func (n *Newton) Do(path string, method string, query query.Query) (*http.Response, error) {
+func (n *Newton) Do(query query.Query) (*http.Response, error) {
 	body, err := query.GetBody()
 	if err != nil {
 		return nil, err
 	}
 
 	req, _ := http.NewRequest(
-		method, 
-		baseUrl + path, 
+		query.GetMethod(),
+		baseUrl + query.GetPath(), 
 		bytes.NewBuffer(body))
 	q := req.URL.Query()
 	for _, a := range query.GetParameters() {
 		q.Add(a.Key, a.Value)
 	}
 	req.URL.RawQuery = q.Encode()
-	if method != http.MethodGet {
+	if query.GetMethod() != http.MethodGet {
 		req.Header.Add("content-type", "application/json")
 	}
 
@@ -211,7 +211,7 @@ func (n *Newton) parseResponse(res *http.Response) ([]byte, error) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 func (n *Newton) TickSizes() (*GetTickSizesResp, error) {
 	query := &query.TickSizes{}
-	res, err := n.Do("/order/tick-sizes", http.MethodGet, query)
+	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +232,7 @@ func (n *Newton) TickSizes() (*GetTickSizesResp, error) {
 
 func (n *Newton) MaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
 	query := &query.MaximumTradeAmounts{}
-	res, err := n.Do("/order/maximums", http.MethodGet, query)
+	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
 	}
@@ -253,7 +253,7 @@ func (n *Newton) MaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
 
 func (n *Newton) ApplicableFees() (*GetApplicableFeesResp, error) {
 	query := &query.ApplicableFees{}
-	res, err := n.Do("/fees", http.MethodGet, query)
+	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
 	}
@@ -273,7 +273,7 @@ func (n *Newton) ApplicableFees() (*GetApplicableFeesResp, error) {
 }
 
 func (n *Newton) Symbols(query query.Query) (*GetSymbolsResp, error) {
-	res, err := n.Do("/symbols", http.MethodGet, query)
+	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
 	}
@@ -294,7 +294,7 @@ func (n *Newton) Symbols(query query.Query) (*GetSymbolsResp, error) {
 
 func (n *Newton) HealthCheck() error {
 	query := &query.HealthCheck{}
-	res, err := n.Do("/health-check", http.MethodGet, query)
+	res, err := n.Do(query)
 	if err != nil {
 		return err
 	}
@@ -308,7 +308,7 @@ func (n *Newton) HealthCheck() error {
 
 func (n *Newton) MinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
 	query := &query.MinimumTradeAmounts{}
-	res, err := n.Do("/order/minimums", http.MethodGet, query)
+	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
 	}
@@ -330,7 +330,7 @@ func (n *Newton) MinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
 // Private API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 func (n *Newton) Balances(query query.Query) (*BalancesResp, error) {
-	res, err := n.Do("/balances", http.MethodGet, query)
+	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
 	}
@@ -350,7 +350,7 @@ func (n *Newton) Balances(query query.Query) (*BalancesResp, error) {
 }
 
 func (n *Newton) Actions(query query.Query) (*ActionsResp, error) {
-	res, err := n.Do("/actions", http.MethodGet, query)
+	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
 	}
@@ -370,7 +370,7 @@ func (n *Newton) Actions(query query.Query) (*ActionsResp, error) {
 }
 
 func (n *Newton) OrderHistory(query query.Query) (*OrderHistoryResp, error) {
-	res, err := n.Do("/order/history", http.MethodGet, query)
+	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
 	}
@@ -390,7 +390,7 @@ func (n *Newton) OrderHistory(query query.Query) (*OrderHistoryResp, error) {
 }
 
 func (n *Newton) OpenOrders(query query.Query) (*OpenOrdersResp, error) {
-	res, err := n.Do("/order/history", http.MethodGet, query)
+	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
 	}
@@ -410,7 +410,7 @@ func (n *Newton) OpenOrders(query query.Query) (*OpenOrdersResp, error) {
 }
 
 func (n *Newton) NewOrder(query query.Query) (*OpenOrdersResp, error) {
-	res, err := n.Do("/order/new", http.MethodPost, query)
+	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
 	}

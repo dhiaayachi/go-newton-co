@@ -1,6 +1,7 @@
 package newton
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -9,9 +10,8 @@ import (
 )
 
 func getSecrets() (string, string) {
-	return "0198ab98-0475-437e-a4e6-5594398e5562", "220eeda0-e216-45f2-9d3b-e52b1ea90e7b"
+	return os.Getenv("CLIENT_ID"), os.Getenv("CLIENT_SECRET")
 }
-
 
 // Public API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -21,7 +21,7 @@ func TestGetTickSizes(t *testing.T) {
 	ClientId, ClientSecret := getSecrets()
 	sut := New(ClientId, ClientSecret)
 
-	_, err := sut.GetTickSizes()
+	_, err := sut.TickSizes()
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -32,7 +32,7 @@ func TestGetMaximumTradeAmounts(t *testing.T) {
 	ClientId, ClientSecret := getSecrets()
 	sut := New(ClientId, ClientSecret)
 
-	_, err := sut.GetMaximumTradeAmounts()
+	_, err := sut.MaximumTradeAmounts()
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -43,7 +43,7 @@ func TestGetApplicableFees(t *testing.T) {
 	ClientId, ClientSecret := getSecrets()
 	sut := New(ClientId, ClientSecret)
 
-	_, err := sut.GetApplicableFees()
+	_, err := sut.ApplicableFees()
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -59,7 +59,7 @@ func TestSymbolsNoQuery(t *testing.T) {
 		QuoteAsset: query.NO_FILTER,
 	}
 
-	_, err := sut.GetSymbols(q)
+	_, err := sut.Symbols(q)
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -75,7 +75,7 @@ func TestSymbolsWithQuery(t *testing.T) {
 		QuoteAsset: "ETH",
 	}
 
-	_, err := sut.GetSymbols(q)
+	_, err := sut.Symbols(q)
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -97,7 +97,7 @@ func TestGetMinTradeAmounts(t *testing.T) {
 	ClientId, ClientSecret := getSecrets()
 	sut := New(ClientId, ClientSecret)
 
-	_, err := sut.GetMinimumTradeAmount()
+	_, err := sut.MinimumTradeAmount()
 
 	g.Expect(err).Should(gomega.BeNil())
 }

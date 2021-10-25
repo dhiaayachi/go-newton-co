@@ -1,6 +1,9 @@
 package query
 
-import "strconv"
+import (
+	"net/http"
+	"strconv"
+)
 
 type OpenOrders struct {
 	Limit int
@@ -9,8 +12,18 @@ type OpenOrders struct {
 	TimeInForce TimeInForceAllowedValue
 }
 
+const openOrdersPath = "/order/open"
+
 func (oo OpenOrders) GetBody() ([]byte, error) {
 	return []byte(EMPTY_BODY), nil
+}
+
+func (oo OpenOrders) GetMethod() string {
+	return http.MethodGet
+}
+
+func (oo OpenOrders) GetPath() string {
+	return openOrdersPath
 }
 
 func (oo OpenOrders) GetParameters() []Parameter {

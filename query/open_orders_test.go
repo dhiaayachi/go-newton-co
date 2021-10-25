@@ -1,6 +1,7 @@
 package query_test
 
 import (
+	"net/http"
 	"strconv"
 	"testing"
 
@@ -8,25 +9,42 @@ import (
 
 	"github.com/onsi/gomega"
 )
+const(
+	symbol = "BTC_USDC"
+	timeInForce = query.IOC
+)
+
+var validOpenOrders query.OpenOrders = query.OpenOrders{
+	limit,
+	offset,
+	symbol,
+	timeInForce,
+}
 
 func TestOpenOrdersGetBody(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	limit := 1
-	offset := 0
-	symbol := "BTC_USDC"
-	timeInForce := query.IOC
-
-	sut := &query.OpenOrders{
-		limit,
-		offset,
-		symbol,
-		timeInForce,
-	}
+	sut := &validOpenOrders
 
 	actualBody, err := sut.GetBody()
 	g.Expect(err).Should(gomega.BeNil())
 	g.Expect(actualBody).Should(gomega.BeEquivalentTo(query.EMPTY_BODY))
+}
+
+func TestOpenOrdersGetMethod(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &validOpenOrders
+
+	g.Expect(sut.GetMethod()).Should(gomega.Equal(http.MethodGet))
+}
+
+func TestOpenOrdersGetPath(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &validOpenOrders
+
+	g.Expect(sut.GetPath()).Should(gomega.Equal(query.OpenOrdersPath))
 }
 
 func TestOpenOrdersGetParametersNoFilter(t *testing.T) {
@@ -47,17 +65,7 @@ func TestOpenOrdersGetParametersNoFilter(t *testing.T) {
 func TestOpenOrdersGetParameters(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	limit := 1
-	offset := 0
-	symbol := "BTC_USDC"
-	timeInForce := query.IOC
-
-	sut := &query.OpenOrders{
-		limit,
-		offset,
-		symbol,
-		timeInForce,
-	}
+	sut := &validOpenOrders
 
 	parameters := sut.GetParameters()
 
@@ -74,12 +82,7 @@ func TestOpenOrdersGetParameters(t *testing.T) {
 func TestOpenOrdersIsPublic(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	sut := &query.OpenOrders{
-		query.ANY,
-		query.ANY,
-		query.NO_FILTER,
-		query.NO_FILTER_VALUE,
-	}
+	sut := &validOpenOrders
 
 	g.Expect(sut.IsPublic()).Should(gomega.BeFalse())
 }

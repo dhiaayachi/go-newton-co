@@ -1,6 +1,7 @@
 package query_test
 
 import (
+	"net/http"
 	"strconv"
 	"testing"
 	"time"
@@ -10,17 +11,10 @@ import (
 	"github.com/onsi/gomega"
 )
 
-func TestOrderHistoryGetBody(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
-
-	limit := 1
-	offset := 0
-	startDate := time.Now().Unix()
-	endDate := startDate + 1
-	symbol := "BTC_USDC"
-	timeInForce := query.IOC
-
-	sut := &query.OrderHistory{
+var (
+	startDate = time.Now().Unix()
+	endDate = startDate + 1
+	validOrderHistory = query.OrderHistory{
 		limit,
 		offset,
 		startDate,
@@ -28,10 +22,32 @@ func TestOrderHistoryGetBody(t *testing.T) {
 		symbol,
 		timeInForce,
 	}
+)
+
+func TestOrderHistoryGetBody(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &validOrderHistory
 
 	actualBody, err := sut.GetBody()
 	g.Expect(err).Should(gomega.BeNil())
 	g.Expect(actualBody).Should(gomega.BeEquivalentTo(query.EMPTY_BODY))
+}
+
+func TestOrderHistoryGetMethod(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &validOrderHistory
+
+	g.Expect(sut.GetMethod()).Should(gomega.Equal(http.MethodGet))
+}
+
+func TestOrderHistoryGetPath(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &validOrderHistory
+
+	g.Expect(sut.GetPath()).Should(gomega.Equal(query.OrderHistoryPath))
 }
 
 func TestOrdersHistoryGetParametersNoFilter(t *testing.T) {
@@ -54,21 +70,7 @@ func TestOrdersHistoryGetParametersNoFilter(t *testing.T) {
 func TestOrdersHistoryGetParameters(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	limit := 1
-	offset := 0
-	startDate := time.Now().Unix()
-	endDate := startDate + 1
-	symbol := "BTC_USDC"
-	timeInForce := query.IOC
-
-	sut := &query.OrderHistory{
-		limit,
-		offset,
-		startDate,
-		endDate,
-		symbol,
-		timeInForce,
-	}
+	sut := &validOrderHistory
 
 	parameters := sut.GetParameters()
 
@@ -87,14 +89,7 @@ func TestOrdersHistoryGetParameters(t *testing.T) {
 func TestOrderHistoryIsPublic(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	sut := &query.OrderHistory{
-		query.ANY,
-		query.ANY,
-		int64(query.ANY),
-		int64(query.ANY),
-		query.NO_FILTER,
-		query.NO_FILTER_VALUE,
-	}
+	sut := &validOrderHistory
 
 	g.Expect(sut.IsPublic()).Should(gomega.BeFalse())
 }

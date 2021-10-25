@@ -1,6 +1,7 @@
 package query_test
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/dhiaayachi/go-newton-co/query"
@@ -8,20 +9,40 @@ import (
 	"github.com/onsi/gomega"
 )
 
+const (
+	baseAsset  = "BTC"
+	quoteAsset = "ETH"
+)
+
+var validSymbols = query.Symbols{
+	baseAsset,
+	quoteAsset,
+}
+
 func TestSymbolsGetBody(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	baseAsset := "BTC"
-	quoteAsset := "ETH"
-
-	sut := &query.Symbols{
-		baseAsset,
-		quoteAsset,
-	}
+	sut := &validSymbols
 
 	actualBody, err := sut.GetBody()
 	g.Expect(err).Should(gomega.BeNil())
 	g.Expect(actualBody).Should(gomega.BeEquivalentTo(query.EMPTY_BODY))
+}
+
+func TestSymbolsGetMethod(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &validSymbols
+
+	g.Expect(sut.GetMethod()).Should(gomega.Equal(http.MethodGet))
+}
+
+func TestSymbolsGetPath(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &validSymbols
+
+	g.Expect(sut.GetPath()).Should(gomega.Equal(query.SymbolsPath))
 }
 
 func TestSymbolsGetParametersNoFilter(t *testing.T) {
@@ -40,13 +61,7 @@ func TestSymbolsGetParametersNoFilter(t *testing.T) {
 func TestSymbolsGetParameters(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	baseAsset := "BTC"
-	quoteAsset := "ETH"
-
-	sut := &query.Symbols{
-		baseAsset,
-		quoteAsset,
-	}
+	sut := &validSymbols
 
 	parameters := sut.GetParameters()
 
@@ -61,10 +76,7 @@ func TestSymbolsGetParameters(t *testing.T) {
 func TestSymbolsIsPublic(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	sut := &query.Symbols{
-		query.NO_FILTER,
-		query.NO_FILTER,
-	}
+	sut := &validSymbols
 
 	g.Expect(sut.IsPublic()).Should(gomega.BeTrue())
 }

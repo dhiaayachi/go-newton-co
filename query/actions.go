@@ -1,6 +1,9 @@
 package query
 
-import "strconv"
+import (
+	"net/http"
+	"strconv"
+)
 
 type Actions struct {
 	ActionType ActionType
@@ -8,6 +11,16 @@ type Actions struct {
 	Offset int
 	StartDate int64
 	EndDate int64
+}
+
+const actionsPath = "/actions"
+
+func (a Actions) GetMethod() string {
+	return http.MethodGet
+}
+
+func (a Actions) GetPath() string {
+	return actionsPath
 }
 
 func (a Actions) GetBody() ([]byte, error) {

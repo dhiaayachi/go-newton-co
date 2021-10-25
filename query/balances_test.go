@@ -1,6 +1,7 @@
 package query_test
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/dhiaayachi/go-newton-co/query"
@@ -8,18 +9,35 @@ import (
 	"github.com/onsi/gomega"
 )
 
+const asset = "BTC"
+var validBalances query.Balances = query.Balances{
+	asset,
+}
+
 func TestBalancesGetBody(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	asset := "BTC"
-
-	sut := &query.Balances{
-		asset,
-	}
+	sut := &validBalances
 
 	actualBody, err := sut.GetBody()
 	g.Expect(err).Should(gomega.BeNil())
 	g.Expect(actualBody).Should(gomega.BeEquivalentTo(query.EMPTY_BODY))
+}
+
+func TestBalancesGetMethod(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &validBalances
+
+	g.Expect(sut.GetMethod()).Should(gomega.Equal(http.MethodGet))
+}
+
+func TestBalancesGetPath(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.ApplicableFees{}
+
+	g.Expect(sut.GetPath()).Should(gomega.Equal(query.ApplicableFeesPath))
 }
 
 func TestBalancesGetParametersNoFilter(t *testing.T) {
@@ -37,11 +55,7 @@ func TestBalancesGetParametersNoFilter(t *testing.T) {
 func TestBalancesGetParameters(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	asset := "BTC"
-
-	sut := &query.Balances{
-		asset,
-	}
+	sut := &validBalances
 
 	parameters := sut.GetParameters()
 
@@ -55,9 +69,7 @@ func TestBalancesGetParameters(t *testing.T) {
 func TestBalancesIsPublic(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	sut := &query.Balances{
-		query.NO_FILTER,
-	}
+	sut := &validBalances
 
 	g.Expect(sut.IsPublic()).Should(gomega.BeFalse())
 }

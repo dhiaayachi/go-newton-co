@@ -1,11 +1,23 @@
 package query
 
+import "net/http"
+
 type Symbols struct {
 	BaseAsset, QuoteAsset string
 }
 
+const symbolsPath = "/symbols"
+
 func (s Symbols) GetBody() ([]byte, error) {
 	return []byte(EMPTY_BODY), nil
+}
+
+func (s Symbols) GetMethod() string {
+	return http.MethodGet
+}
+
+func (s Symbols) GetPath() string {
+	return symbolsPath
 }
 
 func (s Symbols) GetParameters() []Parameter {

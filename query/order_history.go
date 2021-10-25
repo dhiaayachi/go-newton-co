@@ -1,6 +1,9 @@
 package query
 
-import "strconv"
+import (
+	"net/http"
+	"strconv"
+)
 
 type OrderHistory struct {
 	Limit int
@@ -11,8 +14,18 @@ type OrderHistory struct {
 	TimeInForce TimeInForceAllowedValue
 }
 
+const orderHistoryPath = "/order/history"
+
 func (oh OrderHistory) GetBody() ([]byte, error) {
 	return []byte(EMPTY_BODY), nil
+}
+
+func (oh OrderHistory) GetMethod() string {
+	return http.MethodGet
+}
+
+func (oh OrderHistory) GetPath() string {
+	return orderHistoryPath
 }
 
 func (oh OrderHistory) GetParameters() []Parameter {

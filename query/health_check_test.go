@@ -1,6 +1,7 @@
 package query_test
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/dhiaayachi/go-newton-co/query"
@@ -16,6 +17,22 @@ func TestHealthCheckGetBody(t *testing.T) {
 	actualBody, err := sut.GetBody()
 	g.Expect(err).Should(gomega.BeNil())
 	g.Expect(actualBody).Should(gomega.BeEquivalentTo(query.EMPTY_BODY))
+}
+
+func TestHealthCheckGetMethod(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.HealthCheck{}
+
+	g.Expect(sut.GetMethod()).Should(gomega.Equal(http.MethodGet))
+}
+
+func TestHealthCheckGetPath(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.HealthCheck{}
+
+	g.Expect(sut.GetPath()).Should(gomega.Equal(query.HealthCheckPath))
 }
 
 func TestHealthCheckGetParameters(t *testing.T) {

@@ -1,11 +1,23 @@
 package query
 
+import "net/http"
+
 type Balances struct {
 	Asset string
 }
 
+const balancesPath = "/balances"
+
 func (b Balances) GetBody() ([]byte, error) {
 	return []byte(EMPTY_BODY), nil
+}
+
+func (b Balances) GetMethod() string {
+	return http.MethodGet
+}
+
+func (b Balances) GetPath() string {
+	return balancesPath
 }
 
 func (b Balances) GetParameters() []Parameter {

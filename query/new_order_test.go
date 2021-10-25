@@ -2,6 +2,7 @@ package query_test
 
 import (
 	"encoding/json"
+	"net/http"
 	"testing"
 
 	"github.com/dhiaayachi/go-newton-co/query"
@@ -9,21 +10,24 @@ import (
 	"github.com/onsi/gomega"
 )
 
+var (
+	body query.NewOrderBody = query.NewOrderBody{
+	OrderType:   "LIMIT",
+	TimeInForce: query.IOC,
+	Side:        "BUY",
+	Symbol:      "BTC_USDC",
+	Price:       10.0,
+	Quantity:    2.5,
+	}
+	validNewOrder query.NewOrder = query.NewOrder{
+		Body: body,
+	}
+)
+
 func TestNewOrderGetBody(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	body := query.NewOrderBody{
-		OrderType:   "LIMIT",
-		TimeInForce: query.IOC,
-		Side:        "BUY",
-		Symbol:      "BTC_USDC",
-		Price:       10.0,
-		Quantity:    2.5,
-	}
-
-	sut := &query.NewOrder{
-		Body: body,
-	}
+	sut := &validNewOrder
 
 	actualBody, err := sut.GetBody()
 	g.Expect(err).Should(gomega.BeNil())
@@ -35,19 +39,26 @@ func TestNewOrderGetBody(t *testing.T) {
 	g.Expect(actualBodyParsed).Should(gomega.BeEquivalentTo(body))
 }
 
+func TestNewOrderGetMethod(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.NewOrder{}
+
+	g.Expect(sut.GetMethod()).Should(gomega.Equal(http.MethodPost))
+}
+
+func TestNewOrderGetPath(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.NewOrder{}
+
+	g.Expect(sut.GetPath()).Should(gomega.Equal(query.NewOrderPath))
+}
+
 func TestNewOrderGetParameters(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	sut := &query.NewOrder{
-		Body: query.NewOrderBody{
-			OrderType:   "LIMIT",
-			TimeInForce: query.IOC,
-			Side:        "BUY",
-			Symbol:      "BTC_USDC",
-			Price:       10.0,
-			Quantity:    2.5,
-		},
-	}
+	sut := &validNewOrder
 
 	parameters := sut.GetParameters()
 
@@ -57,7 +68,7 @@ func TestNewOrderGetParameters(t *testing.T) {
 func TestNewOrderIsPublic(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	sut := &query.NewOrder{}
+	sut := &validNewOrder
 
 	g.Expect(sut.IsPublic()).Should(gomega.BeFalse())
 }
