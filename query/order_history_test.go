@@ -10,7 +10,7 @@ import (
 	"github.com/onsi/gomega"
 )
 
-func TestOrdersHistoryQueryNoFilter(t *testing.T) {
+func TestOrdersHistoryGetParametersNoFilter(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := &query.OrderHistory{
@@ -27,7 +27,7 @@ func TestOrdersHistoryQueryNoFilter(t *testing.T) {
 	g.Expect(len(parameters)).Should(gomega.Equal(0))
 }
 
-func TestOrdersHistoryQuery(t *testing.T) {
+func TestOrdersHistoryGetParameters(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	limit := 1

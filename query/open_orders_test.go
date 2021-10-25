@@ -9,7 +9,7 @@ import (
 	"github.com/onsi/gomega"
 )
 
-func TestOpenOrdersQueryNoFilter(t *testing.T) {
+func TestOpenOrdersGetParametersNoFilter(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := &query.OpenOrders{
@@ -24,7 +24,7 @@ func TestOpenOrdersQueryNoFilter(t *testing.T) {
 	g.Expect(len(parameters)).Should(gomega.Equal(0))
 }
 
-func TestOpenOrdersQuery(t *testing.T) {
+func TestOpenOrdersGetParameters(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	limit := 1

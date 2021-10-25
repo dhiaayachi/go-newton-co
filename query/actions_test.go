@@ -10,7 +10,7 @@ import (
 	"github.com/onsi/gomega"
 )
 
-func TestActionsQueryNoFilter(t *testing.T) {
+func TestActionsGetParametersNoFilter(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := &query.Actions{
@@ -26,7 +26,7 @@ func TestActionsQueryNoFilter(t *testing.T) {
 	g.Expect(len(parameters)).Should(gomega.Equal(0))
 }
 
-func TestActionsQuery(t *testing.T) {
+func TestActionsGetParameters(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	actionType := query.DEPOSIT

@@ -8,7 +8,7 @@ import (
 	"github.com/onsi/gomega"
 )
 
-func TestSymbolsQueryNoFilter(t *testing.T) {
+func TestSymbolsGetParametersNoFilter(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := &query.Symbols{
@@ -21,7 +21,7 @@ func TestSymbolsQueryNoFilter(t *testing.T) {
 	g.Expect(len(parameters)).Should(gomega.Equal(0))
 }
 
-func TestSymbolsQuery(t *testing.T) {
+func TestSymbolsGetParameters(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	baseAsset := "BTC"
