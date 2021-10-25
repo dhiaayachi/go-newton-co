@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -195,7 +194,7 @@ func (n *Newton) parseResponse(res *http.Response) ([]byte, error) {
 		}
 	}()
 	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
+		return nil, fmt.Errorf("request failed :: %d", res.StatusCode)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
@@ -205,7 +204,7 @@ func (n *Newton) parseResponse(res *http.Response) ([]byte, error) {
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d :: %s", res.StatusCode, body))
+		return nil, fmt.Errorf("request failed :: %d :: %s", res.StatusCode, body)
 	}
 
 	return body, nil
@@ -300,7 +299,7 @@ func (n *Newton) HealthCheck() error {
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
+		return fmt.Errorf("request failed :: %d", res.StatusCode)
 	}
 
 	return nil
