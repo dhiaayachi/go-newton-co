@@ -1,6 +1,7 @@
 package query_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/dhiaayachi/go-newton-co/query"
@@ -24,7 +25,14 @@ func TestNewOrderGetBody(t *testing.T) {
 		Body: body,
 	}
 
-	g.Expect(sut.GetBody()).Should(gomega.BeEquivalentTo(&body))
+	actualBody, err := sut.GetBody()
+	g.Expect(err).Should(gomega.BeNil())
+
+	var actualBodyParsed query.NewOrderBody
+	err = json.Unmarshal([]byte(actualBody), &actualBodyParsed)
+	g.Expect(err).Should(gomega.BeNil())
+
+	g.Expect(actualBodyParsed).Should(gomega.BeEquivalentTo(body))
 }
 
 func TestNewOrderGetParameters(t *testing.T) {

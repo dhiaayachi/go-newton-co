@@ -17,7 +17,7 @@ func TestBalancesGetBody(t *testing.T) {
 		asset,
 	}
 
-	g.Expect(sut.GetBody()).Should(gomega.BeNil())
+	g.Expect(sut.GetBody()).Should(gomega.Equal(query.EMPTY_BODY))
 }
 
 func TestBalancesGetParametersNoFilter(t *testing.T) {

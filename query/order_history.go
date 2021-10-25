@@ -11,8 +11,8 @@ type OrderHistory struct {
 	TimeInForce TimeInForceAllowedValue
 }
 
-func (oh OrderHistory) GetBody() interface{} {
-	return nil
+func (oh OrderHistory) GetBody() (string, error) {
+	return EMPTY_BODY, nil
 }
 
 func (oh OrderHistory) GetParameters() []Parameter {

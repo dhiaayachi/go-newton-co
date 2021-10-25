@@ -35,6 +35,7 @@ const (
 const (
 	ANY int = -1
 	NO_FILTER string = ""
+	EMPTY_BODY = ""
 )
 
 type Parameter struct {
@@ -43,7 +44,7 @@ type Parameter struct {
 }
 
 type Query interface {
-	GetBody() interface{}
+	GetBody() (string, error)
 	GetParameters() []Parameter
 	IsPublic() bool
 }

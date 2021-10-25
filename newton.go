@@ -154,7 +154,6 @@ func (n *Newton) sign(req *http.Request) error {
 
 func (n *Newton) doQuery(path string, method string, parameters []query.Parameter, isPublic bool, body string) (*http.Response, error) {
 	url := baseUrl + path
-
 	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
 	q := req.URL.Query()
 	for _, a := range parameters {
@@ -404,12 +403,12 @@ func (n *Newton) OpenOrders(query query.Query) (*OpenOrdersResp, error) {
 }
 
 func (n *Newton) NewOrder(query query.Query) (*OpenOrdersResp, error) {
-	b, err := json.Marshal(query.GetBody())
+	reqBody, err := query.GetBody()
 	if err != nil {
 		return nil, err
 	}
-
-	res, err := n.doQuery("/order/new", http.MethodPost, query.GetParameters(), query.IsPublic(), string(b))
+	
+	res, err := n.doQuery("/order/new", http.MethodPost, query.GetParameters(), query.IsPublic(), reqBody)
 	if err != nil {
 		return nil, err
 	}

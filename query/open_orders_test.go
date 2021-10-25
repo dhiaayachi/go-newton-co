@@ -24,7 +24,7 @@ func TestOpenOrdersGetBody(t *testing.T) {
 		timeInForce,
 	}
 	
-	g.Expect(sut.GetBody()).Should(gomega.BeNil())
+	g.Expect(sut.GetBody()).Should(gomega.Equal(query.EMPTY_BODY))
 }
 
 func TestOpenOrdersGetParametersNoFilter(t *testing.T) {

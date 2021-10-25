@@ -10,8 +10,8 @@ type Actions struct {
 	EndDate int64
 }
 
-func (a Actions) GetBody() interface{} {
-	return nil
+func (a Actions) GetBody() (string, error) {
+	return EMPTY_BODY, nil
 }
 
 func (a Actions) GetParameters() []Parameter {

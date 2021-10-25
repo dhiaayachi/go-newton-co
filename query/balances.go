@@ -4,8 +4,8 @@ type Balances struct {
 	Asset string
 }
 
-func (b Balances) GetBody() interface{} {
-	return nil
+func (b Balances) GetBody() (string, error) {
+	return EMPTY_BODY, nil
 }
 
 func (b Balances) GetParameters() []Parameter {

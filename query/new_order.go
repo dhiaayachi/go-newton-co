@@ -1,5 +1,7 @@
 package query
 
+import "encoding/json"
+
 type NewOrderBody struct {
 	OrderType   string  `json:"order_type"`
 	TimeInForce TimeInForceAllowedValue  `json:"time_in_force"`
@@ -13,8 +15,12 @@ type NewOrder struct {
 	Body NewOrderBody
 }
 
-func (no NewOrder) GetBody() interface{} {
-	return &no.Body
+func (no NewOrder) GetBody() (string, error) {
+	body, err := json.Marshal(no.Body)
+	if err != nil {
+		return EMPTY_BODY, err
+	}
+	return string(body), nil
 }
 
 func (no NewOrder) GetParameters() []Parameter {

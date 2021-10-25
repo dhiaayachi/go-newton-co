@@ -19,7 +19,7 @@ func TestSymbolsGetBody(t *testing.T) {
 		quoteAsset,
 	}
 	
-	g.Expect(sut.GetBody()).Should(gomega.BeNil())
+	g.Expect(sut.GetBody()).Should(gomega.Equal(query.EMPTY_BODY))
 }
 
 func TestSymbolsGetParametersNoFilter(t *testing.T) {

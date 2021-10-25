@@ -13,7 +13,7 @@ func TestHealthCheckGetBody(t *testing.T) {
 
 	sut := &query.HealthCheck{}
 	
-	g.Expect(sut.GetBody()).Should(gomega.BeNil())
+	g.Expect(sut.GetBody()).Should(gomega.Equal(query.EMPTY_BODY))
 }
 
 func TestHealthCheckGetParameters(t *testing.T) {
