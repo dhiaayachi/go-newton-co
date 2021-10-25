@@ -3,8 +3,8 @@ package query
 type MinimumTradeAmounts struct {
 }
 
-func (mta MinimumTradeAmounts) GetBody() (string, error) {
-	return EMPTY_BODY, nil
+func (mta MinimumTradeAmounts) GetBody() ([]byte, error) {
+	return []byte(EMPTY_BODY), nil
 }
 
 func (mta MinimumTradeAmounts) GetParameters() []Parameter {

@@ -23,7 +23,7 @@ func TestActionsGetBody(t *testing.T) {
 
 	actualBody, err := sut.GetBody()
 	g.Expect(err).Should(gomega.BeNil())
-	g.Expect(actualBody).Should(gomega.Equal(query.EMPTY_BODY))
+	g.Expect(actualBody).Should(gomega.BeEquivalentTo(query.EMPTY_BODY))
 }
 
 func TestActionsGetParametersNoFilter(t *testing.T) {

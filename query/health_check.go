@@ -3,8 +3,8 @@ package query
 type HealthCheck struct {
 }
 
-func (hc HealthCheck) GetBody() (string, error) {
-	return EMPTY_BODY, nil
+func (hc HealthCheck) GetBody() ([]byte, error) {
+	return []byte(EMPTY_BODY), nil
 }
 
 func (hc HealthCheck) GetParameters() []Parameter {

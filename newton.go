@@ -152,11 +152,18 @@ func (n *Newton) sign(req *http.Request) error {
 	return nil
 }
 
-func (n *Newton) doQuery(path string, method string, parameters []query.Parameter, isPublic bool, body string) (*http.Response, error) {
-	url := baseUrl + path
-	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
+func (n *Newton) Do(path string, method string, query query.Query) (*http.Response, error) {
+	body, err := query.GetBody()
+	if err != nil {
+		return nil, err
+	}
+
+	req, _ := http.NewRequest(
+		method, 
+		baseUrl + path, 
+		bytes.NewBuffer(body))
 	q := req.URL.Query()
-	for _, a := range parameters {
+	for _, a := range query.GetParameters() {
 		q.Add(a.Key, a.Value)
 	}
 	req.URL.RawQuery = q.Encode()
@@ -164,7 +171,7 @@ func (n *Newton) doQuery(path string, method string, parameters []query.Paramete
 		req.Header.Add("content-type", "application/json")
 	}
 
-	if !isPublic {
+	if !query.IsPublic() {
 		err := n.sign(req)
 		if err != nil {
 			return nil, err
@@ -204,7 +211,7 @@ func (n *Newton) parseResponse(res *http.Response) ([]byte, error) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 func (n *Newton) TickSizes() (*GetTickSizesResp, error) {
 	query := &query.TickSizes{}
-	res, err := n.doQuery("/order/tick-sizes", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
+	res, err := n.Do("/order/tick-sizes", http.MethodGet, query)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +232,7 @@ func (n *Newton) TickSizes() (*GetTickSizesResp, error) {
 
 func (n *Newton) MaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
 	query := &query.MaximumTradeAmounts{}
-	res, err := n.doQuery("/order/maximums", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
+	res, err := n.Do("/order/maximums", http.MethodGet, query)
 	if err != nil {
 		return nil, err
 	}
@@ -246,7 +253,7 @@ func (n *Newton) MaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
 
 func (n *Newton) ApplicableFees() (*GetApplicableFeesResp, error) {
 	query := &query.ApplicableFees{}
-	res, err := n.doQuery("/fees", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
+	res, err := n.Do("/fees", http.MethodGet, query)
 	if err != nil {
 		return nil, err
 	}
@@ -266,7 +273,7 @@ func (n *Newton) ApplicableFees() (*GetApplicableFeesResp, error) {
 }
 
 func (n *Newton) Symbols(query query.Query) (*GetSymbolsResp, error) {
-	res, err := n.doQuery("/symbols", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
+	res, err := n.Do("/symbols", http.MethodGet, query)
 	if err != nil {
 		return nil, err
 	}
@@ -287,7 +294,7 @@ func (n *Newton) Symbols(query query.Query) (*GetSymbolsResp, error) {
 
 func (n *Newton) HealthCheck() error {
 	query := &query.HealthCheck{}
-	res, err := n.doQuery("/health-check", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
+	res, err := n.Do("/health-check", http.MethodGet, query)
 	if err != nil {
 		return err
 	}
@@ -301,7 +308,7 @@ func (n *Newton) HealthCheck() error {
 
 func (n *Newton) MinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
 	query := &query.MinimumTradeAmounts{}
-	res, err := n.doQuery("/order/minimums", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
+	res, err := n.Do("/order/minimums", http.MethodGet, query)
 	if err != nil {
 		return nil, err
 	}
@@ -323,7 +330,7 @@ func (n *Newton) MinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
 // Private API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 func (n *Newton) Balances(query query.Query) (*BalancesResp, error) {
-	res, err := n.doQuery("/balances", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
+	res, err := n.Do("/balances", http.MethodGet, query)
 	if err != nil {
 		return nil, err
 	}
@@ -343,7 +350,7 @@ func (n *Newton) Balances(query query.Query) (*BalancesResp, error) {
 }
 
 func (n *Newton) Actions(query query.Query) (*ActionsResp, error) {
-	res, err := n.doQuery("/actions", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
+	res, err := n.Do("/actions", http.MethodGet, query)
 	if err != nil {
 		return nil, err
 	}
@@ -363,7 +370,7 @@ func (n *Newton) Actions(query query.Query) (*ActionsResp, error) {
 }
 
 func (n *Newton) OrderHistory(query query.Query) (*OrderHistoryResp, error) {
-	res, err := n.doQuery("/order/history", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
+	res, err := n.Do("/order/history", http.MethodGet, query)
 	if err != nil {
 		return nil, err
 	}
@@ -383,7 +390,7 @@ func (n *Newton) OrderHistory(query query.Query) (*OrderHistoryResp, error) {
 }
 
 func (n *Newton) OpenOrders(query query.Query) (*OpenOrdersResp, error) {
-	res, err := n.doQuery("/order/history", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
+	res, err := n.Do("/order/history", http.MethodGet, query)
 	if err != nil {
 		return nil, err
 	}
@@ -403,12 +410,7 @@ func (n *Newton) OpenOrders(query query.Query) (*OpenOrdersResp, error) {
 }
 
 func (n *Newton) NewOrder(query query.Query) (*OpenOrdersResp, error) {
-	reqBody, err := query.GetBody()
-	if err != nil {
-		return nil, err
-	}
-	
-	res, err := n.doQuery("/order/new", http.MethodPost, query.GetParameters(), query.IsPublic(), reqBody)
+	res, err := n.Do("/order/new", http.MethodPost, query)
 	if err != nil {
 		return nil, err
 	}

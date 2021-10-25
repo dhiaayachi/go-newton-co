@@ -3,8 +3,8 @@ package query
 type TickSizes struct {
 }
 
-func (ts TickSizes) GetBody() (string, error) {
-	return EMPTY_BODY, nil
+func (ts TickSizes) GetBody() ([]byte, error) {
+	return []byte(EMPTY_BODY), nil
 }
 
 func (ts TickSizes) GetParameters() []Parameter {

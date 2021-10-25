@@ -44,7 +44,7 @@ type Parameter struct {
 }
 
 type Query interface {
-	GetBody() (string, error)
+	GetBody() ([]byte, error)
 	GetParameters() []Parameter
 	IsPublic() bool
 }

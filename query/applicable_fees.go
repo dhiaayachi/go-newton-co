@@ -3,8 +3,8 @@ package query
 type ApplicableFees struct {
 }
 
-func (af ApplicableFees) GetBody() (string, error) {
-	return EMPTY_BODY, nil
+func (af ApplicableFees) GetBody() ([]byte, error) {
+	return []byte(EMPTY_BODY), nil
 }
 
 func (af ApplicableFees) GetParameters() []Parameter {

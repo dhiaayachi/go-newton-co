@@ -9,8 +9,8 @@ type OpenOrders struct {
 	TimeInForce TimeInForceAllowedValue
 }
 
-func (oo OpenOrders) GetBody() (string, error) {
-	return EMPTY_BODY, nil
+func (oo OpenOrders) GetBody() ([]byte, error) {
+	return []byte(EMPTY_BODY), nil
 }
 
 func (oo OpenOrders) GetParameters() []Parameter {

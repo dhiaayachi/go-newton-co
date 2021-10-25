@@ -15,12 +15,12 @@ type NewOrder struct {
 	Body NewOrderBody
 }
 
-func (no NewOrder) GetBody() (string, error) {
+func (no NewOrder) GetBody() ([]byte, error) {
 	body, err := json.Marshal(no.Body)
 	if err != nil {
-		return EMPTY_BODY, err
+		return []byte(EMPTY_BODY), err
 	}
-	return string(body), nil
+	return body, nil
 }
 
 func (no NewOrder) GetParameters() []Parameter {

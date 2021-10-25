@@ -13,7 +13,9 @@ func TestApplicableFeesGetBody(t *testing.T) {
 
 	sut := &query.ApplicableFees{}
 
-	g.Expect(sut.GetBody()).Should(gomega.Equal(query.EMPTY_BODY))
+	actualBody, err := sut.GetBody()
+	g.Expect(err).Should(gomega.BeNil())
+	g.Expect(actualBody).Should(gomega.BeEquivalentTo(query.EMPTY_BODY))
 }
 
 func TestApplicableFeesGetParameters(t *testing.T) {

@@ -12,8 +12,10 @@ func TestTickSizesGetBody(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := &query.TickSizes{}
-	
-	g.Expect(sut.GetBody()).Should(gomega.Equal(query.EMPTY_BODY))
+
+	actualBody, err := sut.GetBody()
+	g.Expect(err).Should(gomega.BeNil())
+	g.Expect(actualBody).Should(gomega.BeEquivalentTo(query.EMPTY_BODY))
 }
 
 func TestTickSizesGetParameters(t *testing.T) {
