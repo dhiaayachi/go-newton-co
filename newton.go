@@ -255,7 +255,8 @@ func (n *Newton) MaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
 }
 
 func (n *Newton) ApplicableFees() (*GetApplicableFeesResp, error) {
-	res, err := n.doQuery("/fees", http.MethodGet, []query.Parameter{}, true, "")
+	query := &query.ApplicableFees{}
+	res, err := n.doQuery("/fees", http.MethodGet, query.GetParameters(), query.IsPublic(), "")
 	if err != nil {
 		return nil, err
 	}
