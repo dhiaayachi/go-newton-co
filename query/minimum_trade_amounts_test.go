@@ -2,6 +2,7 @@ package query_test
 
 import (
 	"net/http"
+	"reflect"
 	"testing"
 
 	"github.com/dhiaayachi/go-newton-co/query"
@@ -43,6 +44,16 @@ func TestMinimumTradeAmountGetParameters(t *testing.T) {
 	parameters := sut.GetParameters()
 
 	g.Expect(len(parameters)).Should(gomega.Equal(0))
+}
+
+func TestMinimumTradeAmountsGetResponse(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.MinimumTradeAmounts{}
+
+	response := sut.GetResponse()
+
+	g.Expect(reflect.TypeOf(response)).Should(gomega.Equal(reflect.TypeOf(&query.MinimumTradeAmountsResponse{})))
 }
 
 func TestMinimumTradeAmountIsPublic(t *testing.T) {

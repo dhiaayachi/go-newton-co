@@ -2,6 +2,7 @@ package query_test
 
 import (
 	"net/http"
+	"reflect"
 	"testing"
 
 	"github.com/dhiaayachi/go-newton-co/query"
@@ -44,6 +45,16 @@ func TestMaximumTradeAmountsGetParameters(t *testing.T) {
 
 	g.Expect(len(parameters)).Should(gomega.Equal(0))
 }
+
+func TestMaximumTradeAmountsGetResponse(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.MaximumTradeAmounts{}
+
+	response := sut.GetResponse()
+
+	g.Expect(reflect.TypeOf(response)).Should(gomega.Equal(reflect.TypeOf(&query.MaximumTradeAmountsResponse{})))
+}	
 
 func TestMaximumTradeAmountsIsPublic(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
