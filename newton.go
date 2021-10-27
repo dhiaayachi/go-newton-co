@@ -24,6 +24,11 @@ type Newton struct {
 	clientSecret string
 }
 
+type Response struct {
+	StatusCode int
+	Body interface{}
+}
+
 func New(ClientId string, ClientSecret string) *Newton {
 	return &Newton{ClientId, ClientSecret}
 }
@@ -80,7 +85,7 @@ func (n *Newton) sign(req *http.Request) error {
 	return nil
 }
 
-func (n *Newton) Do(query query.Query) (interface{}, error) {
+func (n *Newton) Do(query query.Query) (*Response, error) {
 	body, err := query.GetBody()
 	if err != nil {
 		return nil, err
@@ -90,10 +95,12 @@ func (n *Newton) Do(query query.Query) (interface{}, error) {
 		query.GetMethod(),
 		baseUrl + query.GetPath(), 
 		bytes.NewBuffer(body))
+	
 	q := req.URL.Query()
 	for _, a := range query.GetParameters() {
 		q.Add(a.Key, a.Value)
 	}
+
 	req.URL.RawQuery = q.Encode()
 	if query.GetMethod() != http.MethodGet {
 		req.Header.Add("content-type", "application/json")
@@ -111,8 +118,7 @@ func (n *Newton) Do(query query.Query) (interface{}, error) {
 		return nil, err
 	}
 
-	parsedResponse := query.GetResponse()
-	err = n.parseResponse(res, parsedResponse)
+	parsedResponse, err := n.parseResponse(res, query.GetResponse())
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +126,7 @@ func (n *Newton) Do(query query.Query) (interface{}, error) {
 	return parsedResponse, err
 }
 
-func (n *Newton) parseResponse(res *http.Response, toParseTo interface{}) error {
+func (n *Newton) parseResponse(res *http.Response, toParseTo interface{}) (*Response, error) {
 	defer func() {
 		err := res.Body.Close()
 		if err != nil {
@@ -128,28 +134,31 @@ func (n *Newton) parseResponse(res *http.Response, toParseTo interface{}) error 
 		}
 	}()
 
-	if toParseTo == nil {
-		return nil
+	parsedResponse := &Response{
+		StatusCode: res.StatusCode,
+		Body: nil,
 	}
 
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("request failed :: %d", res.StatusCode)
+	if toParseTo == nil {
+		return parsedResponse, nil
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 
 	if err != nil {
-		return err
+		return parsedResponse, err
 	}
 
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("request failed :: %d :: %s", res.StatusCode, body)
+	if parsedResponse.StatusCode != http.StatusOK {
+		return parsedResponse, fmt.Errorf("request failed :: %d :: %s", res.StatusCode, body)
 	}
 
 	err = json.Unmarshal(body, toParseTo)
 	if err != nil {
-		return err
+		return parsedResponse, err
 	}
 
-	return nil
+	parsedResponse.Body = toParseTo
+
+	return parsedResponse, nil
 }
