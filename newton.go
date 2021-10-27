@@ -24,12 +24,6 @@ type Newton struct {
 	clientSecret string
 }
 
-type GetTickSizesResp struct {
-	Ticks map[string]struct {
-		Tick float64 `json:"tick"`
-	}
-}
-
 type GetMaxTradeAmountsResp struct {
 	TradeAmounts map[string]struct {
 		Buy  float64 `json:"buy"`
@@ -209,7 +203,7 @@ func (n *Newton) parseResponse(res *http.Response) ([]byte, error) {
 
 // Public API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-func (n *Newton) TickSizes() (*GetTickSizesResp, error) {
+func (n *Newton) TickSizes() (interface{}, error) {
 	query := &query.TickSizes{}
 	res, err := n.Do(query)
 	if err != nil {
@@ -221,8 +215,8 @@ func (n *Newton) TickSizes() (*GetTickSizesResp, error) {
 		return nil, err
 	}
 
-	var resp GetTickSizesResp
-	err = json.Unmarshal(body, &resp.Ticks)
+	var resp interface{} = query.GetResponse()
+	err = json.Unmarshal(body, &resp)
 	if err != nil {
 		return nil, err
 	}

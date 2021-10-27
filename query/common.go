@@ -48,5 +48,6 @@ type Query interface {
 	GetMethod() string
 	GetPath() string
 	GetParameters() []Parameter
+	// GetResponse() interface{}
 	IsPublic() bool
 }

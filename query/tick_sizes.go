@@ -4,6 +4,10 @@ import "net/http"
 
 type TickSizes struct {}
 
+type TickSizesResponse map[string]struct {
+	Tick float64 `json:"tick"`
+}
+
 const tickSizesPath = "/order/tick-sizes"
 
 func (ts TickSizes) GetBody() ([]byte, error) {
@@ -20,6 +24,10 @@ func (ts TickSizes) GetPath() string {
 
 func (ts TickSizes) GetParameters() []Parameter {
 	return []Parameter{}
+}
+
+func (ts TickSizes) GetResponse() interface{} {
+	return TickSizesResponse{}
 }
 
 func (ts TickSizes) IsPublic() bool {
