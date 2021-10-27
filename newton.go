@@ -24,21 +24,12 @@ type Newton struct {
 	clientSecret string
 }
 
-type GetMaxTradeAmountsResp struct {
-	TradeAmounts map[string]struct {
-		Buy  float64 `json:"buy"`
-		Sell float64 `json:"sell"`
-	}
-}
-
 type GetApplicableFeesResp struct {
 	Fees struct {
 		Maker float64 `json:"maker"`
 		Taker float64 `json:"taker"`
 	}
 }
-
-type GetMinTradeAmountsResp GetMaxTradeAmountsResp
 
 type GetSymbolsResp struct {
 	Symbols []string
@@ -215,7 +206,7 @@ func (n *Newton) TickSizes() (interface{}, error) {
 		return nil, err
 	}
 
-	var resp interface{} = query.GetResponse()
+	resp := query.GetResponse()
 	err = json.Unmarshal(body, &resp)
 	if err != nil {
 		return nil, err
@@ -224,7 +215,7 @@ func (n *Newton) TickSizes() (interface{}, error) {
 	return &resp, nil
 }
 
-func (n *Newton) MaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
+func (n *Newton) MaximumTradeAmounts() (interface{}, error) {
 	query := &query.MaximumTradeAmounts{}
 	res, err := n.Do(query)
 	if err != nil {
@@ -236,8 +227,8 @@ func (n *Newton) MaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
 		return nil, err
 	}
 
-	var resp GetMaxTradeAmountsResp
-	err = json.Unmarshal(body, &resp.TradeAmounts)
+	resp := query.GetResponse()
+	err = json.Unmarshal(body, &resp)
 	if err != nil {
 		return nil, err
 	}
@@ -300,7 +291,7 @@ func (n *Newton) HealthCheck() error {
 	return nil
 }
 
-func (n *Newton) MinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
+func (n *Newton) MinimumTradeAmount() (interface{}, error) {
 	query := &query.MinimumTradeAmounts{}
 	res, err := n.Do(query)
 	if err != nil {
@@ -312,8 +303,8 @@ func (n *Newton) MinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
 		return nil, err
 	}
 
-	var resp GetMinTradeAmountsResp
-	err = json.Unmarshal(body, &resp.TradeAmounts)
+	resp := query.GetResponse()
+	err = json.Unmarshal(body, &resp)
 	if err != nil {
 		return nil, err
 	}

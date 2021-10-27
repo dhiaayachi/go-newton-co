@@ -27,7 +27,7 @@ func (ts TickSizes) GetParameters() []Parameter {
 }
 
 func (ts TickSizes) GetResponse() interface{} {
-	return TickSizesResponse{}
+	return &TickSizesResponse{}
 }
 
 func (ts TickSizes) IsPublic() bool {

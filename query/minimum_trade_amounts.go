@@ -4,6 +4,11 @@ import "net/http"
 
 type MinimumTradeAmounts struct {}
 
+type MinimumTradeAmountsResponse map[string]struct {
+	Buy  float64 `json:"buy"`
+	Sell float64 `json:"sell"`
+}
+
 const minimumTradeAmountsPath = "/order/minimums"
 
 func (mta MinimumTradeAmounts) GetBody() ([]byte, error) {
@@ -20,6 +25,10 @@ func (mta MinimumTradeAmounts) GetPath() string {
 
 func (mta MinimumTradeAmounts) GetParameters() []Parameter {
 	return []Parameter{}
+}
+
+func (mta MinimumTradeAmounts) GetResponse() interface{} {
+	return &MinimumTradeAmountsResponse{}
 }
 
 func (mta MinimumTradeAmounts) IsPublic() bool {
