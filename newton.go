@@ -80,7 +80,7 @@ func (n *Newton) sign(req *http.Request) error {
 	return nil
 }
 
-func (n *Newton) Do(query query.Query) (*http.Response, error) {
+func (n *Newton) Do(query query.Query) (interface{}, error) {
 	body, err := query.GetBody()
 	if err != nil {
 		return nil, err
@@ -107,252 +107,49 @@ func (n *Newton) Do(query query.Query) (*http.Response, error) {
 	}
 
 	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
 
-	return res, err
+	parsedResponse := query.GetResponse()
+	err = n.parseResponse(res, parsedResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return parsedResponse, err
 }
 
-func (n *Newton) parseResponse(res *http.Response) ([]byte, error) {
+func (n *Newton) parseResponse(res *http.Response, toParseTo interface{}) error {
 	defer func() {
 		err := res.Body.Close()
 		if err != nil {
 			log.Printf("error:%s", err.Error())
 		}
 	}()
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("request failed :: %d", res.StatusCode)
-	}
 
-	body, err := ioutil.ReadAll(res.Body)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("request failed :: %d :: %s", res.StatusCode, body)
-	}
-
-	return body, nil
-}
-
-// Public API
-///////////////////////////////////////////////////////////////////////////////////////////////////
-func (n *Newton) TickSizes() (interface{}, error) {
-	query := &query.TickSizes{}
-	res, err := n.Do(query)
-	if err != nil {
-		return nil, err
-	}
-	
-	body, err := n.parseResponse(res)
-	if err != nil {
-		return nil, err
-	}
-
-	resp := query.GetResponse()
-	err = json.Unmarshal(body, &resp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp, nil
-}
-
-func (n *Newton) MaximumTradeAmounts() (interface{}, error) {
-	query := &query.MaximumTradeAmounts{}
-	res, err := n.Do(query)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := n.parseResponse(res)
-	if err != nil {
-		return nil, err
-	}
-
-	resp := query.GetResponse()
-	err = json.Unmarshal(body, &resp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp, nil
-}
-
-func (n *Newton) ApplicableFees() (interface{}, error) {
-	query := &query.ApplicableFees{}
-	res, err := n.Do(query)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := n.parseResponse(res)
-	if err != nil {
-		return nil, err
-	}
-
-	response := query.GetResponse()
-	err = json.Unmarshal(body, response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
-}
-
-func (n *Newton) Symbols(query query.Query) (interface{}, error) {
-	res, err := n.Do(query)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := n.parseResponse(res)
-	if err != nil {
-		return nil, err
-	}
-
-	response := query.GetResponse()
-	err = json.Unmarshal(body, response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
-}
-
-func (n *Newton) HealthCheck() error {
-	query := &query.HealthCheck{}
-	res, err := n.Do(query)
-	if err != nil {
-		return err
+	if toParseTo == nil {
+		return nil
 	}
 
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("request failed :: %d", res.StatusCode)
 	}
 
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("request failed :: %d :: %s", res.StatusCode, body)
+	}
+
+	err = json.Unmarshal(body, toParseTo)
+	if err != nil {
+		return err
+	}
+
 	return nil
-}
-
-func (n *Newton) MinimumTradeAmount() (interface{}, error) {
-	query := &query.MinimumTradeAmounts{}
-	res, err := n.Do(query)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := n.parseResponse(res)
-	if err != nil {
-		return nil, err
-	}
-
-	resp := query.GetResponse()
-	err = json.Unmarshal(body, &resp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp, nil
-}
-
-// Private API
-///////////////////////////////////////////////////////////////////////////////////////////////////
-func (n *Newton) Balances(query query.Query) (interface{}, error) {
-	res, err := n.Do(query)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := n.parseResponse(res)
-	if err != nil {
-		return nil, err
-	}
-
-	response := query.GetResponse()
-	err = json.Unmarshal(body, response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
-}
-
-func (n *Newton) Actions(query query.Query) (interface{}, error) {
-	res, err := n.Do(query)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := n.parseResponse(res)
-	if err != nil {
-		return nil, err
-	}
-
-	response := query.GetResponse()
-	err = json.Unmarshal(body, response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
-}
-
-func (n *Newton) OrderHistory(query query.Query) (interface{}, error) {
-	res, err := n.Do(query)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := n.parseResponse(res)
-	if err != nil {
-		return nil, err
-	}
-
-	response := query.GetResponse()
-	err = json.Unmarshal(body, response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
-}
-
-func (n *Newton) OpenOrders(query query.Query) (interface{}, error) {
-	res, err := n.Do(query)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := n.parseResponse(res)
-	if err != nil {
-		return nil, err
-	}
-
-	response := query.GetResponse()
-	err = json.Unmarshal(body, response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
-}
-
-func (n *Newton) NewOrder(query query.Query) (interface{}, error) {
-	res, err := n.Do(query)
-	if err != nil {
-		return nil, err
-	}
-	
-	body, err := n.parseResponse(res)
-	if err != nil {
-		return nil, err
-	}
-
-	response := query.GetResponse()
-	err = json.Unmarshal(body, response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
 }

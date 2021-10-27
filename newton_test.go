@@ -21,7 +21,7 @@ func TestGetTickSizes(t *testing.T) {
 	ClientId, ClientSecret := getSecrets()
 	sut := New(ClientId, ClientSecret)
 
-	_, err := sut.TickSizes()
+	_, err := sut.Do(&query.TickSizes{})
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -32,7 +32,7 @@ func TestGetMaximumTradeAmounts(t *testing.T) {
 	ClientId, ClientSecret := getSecrets()
 	sut := New(ClientId, ClientSecret)
 
-	_, err := sut.MaximumTradeAmounts()
+	_, err := sut.Do(&query.MaximumTradeAmounts{})
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -43,7 +43,7 @@ func TestGetApplicableFees(t *testing.T) {
 	ClientId, ClientSecret := getSecrets()
 	sut := New(ClientId, ClientSecret)
 
-	_, err := sut.ApplicableFees()
+	_, err := sut.Do(&query.ApplicableFees{})
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -59,7 +59,7 @@ func TestSymbolsNoQuery(t *testing.T) {
 		QuoteAsset: query.NO_FILTER,
 	}
 
-	_, err := sut.Symbols(q)
+	_, err := sut.Do(q)
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -75,7 +75,7 @@ func TestSymbolsWithQuery(t *testing.T) {
 		QuoteAsset: "ETH",
 	}
 
-	_, err := sut.Symbols(q)
+	_, err := sut.Do(q)
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -86,7 +86,7 @@ func TestHealthCheck(t *testing.T) {
 	ClientId, ClientSecret := getSecrets()
 	sut := New(ClientId, ClientSecret)
 
-	err := sut.HealthCheck()
+	_, err := sut.Do(&query.HealthCheck{})
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -97,7 +97,7 @@ func TestGetMinTradeAmounts(t *testing.T) {
 	ClientId, ClientSecret := getSecrets()
 	sut := New(ClientId, ClientSecret)
 
-	_, err := sut.MinimumTradeAmount()
+	_, err := sut.Do(&query.MinimumTradeAmounts{})
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -111,7 +111,7 @@ func TestBalances(t *testing.T) {
 	sut := New(ClientId, ClientSecret)
 
 	q := &query.Balances{Asset: "BTC"}
-	_, err := sut.Balances(q)
+	_, err := sut.Do(q)
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -123,7 +123,7 @@ func TestBalancesNoQuery(t *testing.T) {
 	sut := New(ClientId, ClientSecret)
 
 	q := &query.Balances{Asset: query.NO_FILTER}
-	_, err := sut.Balances(q)
+	_, err := sut.Do(q)
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -142,7 +142,7 @@ func TestActions(t *testing.T) {
 		EndDate:    time.Date(2020, 01, 02, 00, 00, 00, 00, time.Local).Unix(),
 	}
 
-	_, err := sut.Actions(q)
+	_, err := sut.Do(q)
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -161,7 +161,7 @@ func TestActionsNoQuery(t *testing.T) {
 		EndDate:    int64(query.ANY),
 	}
 
-	_, err := sut.Actions(req)
+	_, err := sut.Do(req)
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -181,7 +181,7 @@ func TestOrderHistory(t *testing.T) {
 		TimeInForce: "IOC",
 	}
 
-	_, err := sut.OrderHistory(q)
+	_, err := sut.Do(q)
 
 	g.Expect(err).Should(gomega.BeNil())
 }
@@ -198,7 +198,7 @@ func TestOpenOrders(t *testing.T) {
 		Symbol:      "BTC_USDC",
 		TimeInForce: "IOC"}
 
-	_, err := sut.OpenOrders(q)
+	_, err := sut.Do(q)
 
 	g.Expect(err).Should(gomega.BeNil())
 }
