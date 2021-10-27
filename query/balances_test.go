@@ -2,6 +2,7 @@ package query_test
 
 import (
 	"net/http"
+	"reflect"
 	"testing"
 
 	"github.com/dhiaayachi/go-newton-co/query"
@@ -65,6 +66,16 @@ func TestBalancesGetParameters(t *testing.T) {
 		gomega.BeEquivalentTo(query.Parameter{string(query.Asset), asset}),
 	))
 }
+
+func TestBalancesGetResponse(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.Balances{}
+
+	response := sut.GetResponse()
+
+	g.Expect(reflect.TypeOf(response)).Should(gomega.Equal(reflect.TypeOf(&query.BalancesResponse{})))
+}	
 
 func TestBalancesIsPublic(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)

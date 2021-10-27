@@ -6,6 +6,8 @@ type Symbols struct {
 	BaseAsset, QuoteAsset string
 }
 
+type SymbolsResponse []string
+
 const symbolsPath = "/symbols"
 
 func (s Symbols) GetBody() ([]byte, error) {
@@ -32,6 +34,10 @@ func (s Symbols) GetParameters() []Parameter {
 	}
 
 	return params
+}
+
+func (s Symbols) GetResponse() interface{} {
+	return &SymbolsResponse{}
 }
 
 func (s Symbols) IsPublic() bool {

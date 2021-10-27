@@ -3,6 +3,7 @@ package query
 import (
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type Actions struct {
@@ -11,6 +12,15 @@ type Actions struct {
 	Offset int
 	StartDate int64
 	EndDate int64
+}
+
+type ActionsResponse []struct {
+	Type        string    `json:"type"`
+	Asset       string    `json:"asset"`
+	Quantity    float64   `json:"quantity"`
+	Status      string    `json:"status"`
+	DateCreated time.Time `json:"date_created"`
+	Price       float64   `json:"price,omitempty"`
 }
 
 const actionsPath = "/actions"
@@ -51,6 +61,10 @@ func (a Actions) GetParameters() []Parameter {
 	}
 
 	return params
+}
+
+func (a Actions) GetResponse() interface{} {
+	return &ActionsResponse{}
 }
 
 func (a Actions) IsPublic() bool {

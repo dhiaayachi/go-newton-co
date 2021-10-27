@@ -22,6 +22,10 @@ func (hc HealthCheck) GetParameters() []Parameter {
 	return []Parameter{}
 }
 
+func (hc HealthCheck) GetResponse() interface{} {
+	return nil
+}
+
 func (hc HealthCheck) IsPublic() bool {
 	return true
 }

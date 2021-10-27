@@ -24,63 +24,6 @@ type Newton struct {
 	clientSecret string
 }
 
-type GetApplicableFeesResp struct {
-	Fees struct {
-		Maker float64 `json:"maker"`
-		Taker float64 `json:"taker"`
-	}
-}
-
-type GetSymbolsResp struct {
-	Symbols []string
-}
-
-type BalancesResp struct {
-	Balances map[string]float64
-}
-
-type OpenOrdersResp struct {
-	OpenOrders []struct {
-		OrderID      string    `json:"order_id"`
-		Symbol       string    `json:"symbol"`
-		Quantity     int       `json:"quantity"`
-		Price        float64   `json:"price"`
-		DateCreated  time.Time `json:"date_created"`
-		OrderType    string    `json:"order_type"`
-		TimeInForce  string    `json:"time_in_force"`
-		Side         string    `json:"side"`
-		QuantityLeft float64   `json:"quantity_left"`
-		ExpiryTime   time.Time `json:"expiry_time"`
-	}
-}
-
-type OrderHistoryResp struct {
-	OrdersHistory []struct {
-		OrderID      string    `json:"order_id"`
-		Symbol       string    `json:"symbol"`
-		Quantity     int       `json:"quantity"`
-		Price        float64   `json:"price"`
-		Status       string    `json:"status"`
-		DateCreated  time.Time `json:"date_created"`
-		DateExecuted string    `json:"date_executed"`
-		OrderType    string    `json:"order_type"`
-		TimeInForce  string    `json:"time_in_force"`
-		Side         string    `json:"side"`
-		ExpiryTime   time.Time `json:"expiry_time,omitempty"`
-	}
-}
-
-type ActionsResp struct {
-	Actions []struct {
-		Type        string    `json:"type"`
-		Asset       string    `json:"asset"`
-		Quantity    float64   `json:"quantity"`
-		Status      string    `json:"status"`
-		DateCreated time.Time `json:"date_created"`
-		Price       float64   `json:"price,omitempty"`
-	}
-}
-
 func New(ClientId string, ClientSecret string) *Newton {
 	return &Newton{ClientId, ClientSecret}
 }
@@ -236,7 +179,7 @@ func (n *Newton) MaximumTradeAmounts() (interface{}, error) {
 	return &resp, nil
 }
 
-func (n *Newton) ApplicableFees() (*GetApplicableFeesResp, error) {
+func (n *Newton) ApplicableFees() (interface{}, error) {
 	query := &query.ApplicableFees{}
 	res, err := n.Do(query)
 	if err != nil {
@@ -248,16 +191,16 @@ func (n *Newton) ApplicableFees() (*GetApplicableFeesResp, error) {
 		return nil, err
 	}
 
-	var resp GetApplicableFeesResp
-	err = json.Unmarshal(body, &resp.Fees)
+	response := query.GetResponse()
+	err = json.Unmarshal(body, response)
 	if err != nil {
 		return nil, err
 	}
 
-	return &resp, nil
+	return response, nil
 }
 
-func (n *Newton) Symbols(query query.Query) (*GetSymbolsResp, error) {
+func (n *Newton) Symbols(query query.Query) (interface{}, error) {
 	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
@@ -268,13 +211,13 @@ func (n *Newton) Symbols(query query.Query) (*GetSymbolsResp, error) {
 		return nil, err
 	}
 
-	var resp GetSymbolsResp
-	err = json.Unmarshal(body, &resp.Symbols)
+	response := query.GetResponse()
+	err = json.Unmarshal(body, response)
 	if err != nil {
 		return nil, err
 	}
 
-	return &resp, nil
+	return response, nil
 }
 
 func (n *Newton) HealthCheck() error {
@@ -314,7 +257,7 @@ func (n *Newton) MinimumTradeAmount() (interface{}, error) {
 
 // Private API
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-func (n *Newton) Balances(query query.Query) (*BalancesResp, error) {
+func (n *Newton) Balances(query query.Query) (interface{}, error) {
 	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
@@ -325,16 +268,16 @@ func (n *Newton) Balances(query query.Query) (*BalancesResp, error) {
 		return nil, err
 	}
 
-	var b BalancesResp
-	err = json.Unmarshal(body, &b.Balances)
+	response := query.GetResponse()
+	err = json.Unmarshal(body, response)
 	if err != nil {
 		return nil, err
 	}
 
-	return &b, nil
+	return response, nil
 }
 
-func (n *Newton) Actions(query query.Query) (*ActionsResp, error) {
+func (n *Newton) Actions(query query.Query) (interface{}, error) {
 	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
@@ -345,16 +288,16 @@ func (n *Newton) Actions(query query.Query) (*ActionsResp, error) {
 		return nil, err
 	}
 
-	var r ActionsResp
-	err = json.Unmarshal(body, &r.Actions)
+	response := query.GetResponse()
+	err = json.Unmarshal(body, response)
 	if err != nil {
 		return nil, err
 	}
 
-	return &r, nil
+	return response, nil
 }
 
-func (n *Newton) OrderHistory(query query.Query) (*OrderHistoryResp, error) {
+func (n *Newton) OrderHistory(query query.Query) (interface{}, error) {
 	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
@@ -365,16 +308,16 @@ func (n *Newton) OrderHistory(query query.Query) (*OrderHistoryResp, error) {
 		return nil, err
 	}
 
-	var r OrderHistoryResp
-	err = json.Unmarshal(body, &r.OrdersHistory)
+	response := query.GetResponse()
+	err = json.Unmarshal(body, response)
 	if err != nil {
 		return nil, err
 	}
 
-	return &r, nil
+	return response, nil
 }
 
-func (n *Newton) OpenOrders(query query.Query) (*OpenOrdersResp, error) {
+func (n *Newton) OpenOrders(query query.Query) (interface{}, error) {
 	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
@@ -385,16 +328,16 @@ func (n *Newton) OpenOrders(query query.Query) (*OpenOrdersResp, error) {
 		return nil, err
 	}
 
-	var r OpenOrdersResp
-	err = json.Unmarshal(body, &r.OpenOrders)
+	response := query.GetResponse()
+	err = json.Unmarshal(body, response)
 	if err != nil {
 		return nil, err
 	}
 
-	return &r, nil
+	return response, nil
 }
 
-func (n *Newton) NewOrder(query query.Query) (*OpenOrdersResp, error) {
+func (n *Newton) NewOrder(query query.Query) (interface{}, error) {
 	res, err := n.Do(query)
 	if err != nil {
 		return nil, err
@@ -405,11 +348,11 @@ func (n *Newton) NewOrder(query query.Query) (*OpenOrdersResp, error) {
 		return nil, err
 	}
 
-	var r OpenOrdersResp
-	err = json.Unmarshal(body, &r.OpenOrders)
+	response := query.GetResponse()
+	err = json.Unmarshal(body, response)
 	if err != nil {
 		return nil, err
 	}
 
-	return &r, nil
+	return response, nil
 }

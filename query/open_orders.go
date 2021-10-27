@@ -3,6 +3,7 @@ package query
 import (
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type OpenOrders struct {
@@ -10,6 +11,19 @@ type OpenOrders struct {
 	Offset int
 	Symbol string
 	TimeInForce TimeInForceAllowedValue
+}
+
+type OpenOrdersResponse []struct {
+	OrderID      string    `json:"order_id"`
+	Symbol       string    `json:"symbol"`
+	Quantity     int       `json:"quantity"`
+	Price        float64   `json:"price"`
+	DateCreated  time.Time `json:"date_created"`
+	OrderType    string    `json:"order_type"`
+	TimeInForce  string    `json:"time_in_force"`
+	Side         string    `json:"side"`
+	QuantityLeft float64   `json:"quantity_left"`
+	ExpiryTime   time.Time `json:"expiry_time"`
 }
 
 const openOrdersPath = "/order/open"
@@ -46,6 +60,10 @@ func (oo OpenOrders) GetParameters() []Parameter {
 	}
 
 	return params
+}
+
+func (oo OpenOrders) GetResponse() interface{} {
+	return &OpenOrdersResponse{}
 }
 
 func (oo OpenOrders) IsPublic() bool {

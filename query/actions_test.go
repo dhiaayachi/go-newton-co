@@ -2,6 +2,7 @@ package query_test
 
 import (
 	"net/http"
+	"reflect"
 	"strconv"
 	"testing"
 	"time"
@@ -88,6 +89,16 @@ func TestActionsGetParameters(t *testing.T) {
 		gomega.BeEquivalentTo(query.Parameter{string(query.EndDate), strconv.FormatInt(endTime, 10)}),
 	))
 }
+
+func TestActionsGetResponse(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.Actions{}
+
+	response := sut.GetResponse()
+
+	g.Expect(reflect.TypeOf(response)).Should(gomega.Equal(reflect.TypeOf(&query.ActionsResponse{})))
+}	
 
 func TestActionsIsPublic(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)

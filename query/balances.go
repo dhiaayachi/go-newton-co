@@ -6,6 +6,8 @@ type Balances struct {
 	Asset string
 }
 
+type BalancesResponse map[string]float64
+
 const balancesPath = "/balances"
 
 func (b Balances) GetBody() ([]byte, error) {
@@ -28,6 +30,10 @@ func (b Balances) GetParameters() []Parameter {
 	}
 
 	return params
+}
+
+func (b Balances) GetResponse() interface{} {
+	return &Balances{}
 }
 
 func (b Balances) IsPublic() bool {

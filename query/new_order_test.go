@@ -3,6 +3,7 @@ package query_test
 import (
 	"encoding/json"
 	"net/http"
+	"reflect"
 	"testing"
 
 	"github.com/dhiaayachi/go-newton-co/query"
@@ -64,6 +65,16 @@ func TestNewOrderGetParameters(t *testing.T) {
 
 	g.Expect(len(parameters)).Should(gomega.Equal(0))
 }
+
+func TestNewOrderGetResponse(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.NewOrder{}
+
+	response := sut.GetResponse()
+
+	g.Expect(reflect.TypeOf(response)).Should(gomega.Equal(reflect.TypeOf(&query.NewOrderResponse{})))
+}	
 
 func TestNewOrderIsPublic(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)

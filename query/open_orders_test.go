@@ -2,6 +2,7 @@ package query_test
 
 import (
 	"net/http"
+	"reflect"
 	"strconv"
 	"testing"
 
@@ -78,6 +79,16 @@ func TestOpenOrdersGetParameters(t *testing.T) {
 		gomega.BeEquivalentTo(query.Parameter{string(query.TimeInForce), string(timeInForce)}),
 	))
 }
+
+func TestOpenOrdersGetResponse(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := &query.OpenOrders{}
+
+	response := sut.GetResponse()
+
+	g.Expect(reflect.TypeOf(response)).Should(gomega.Equal(reflect.TypeOf(&query.OpenOrdersResponse{})))
+}	
 
 func TestOpenOrdersIsPublic(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)

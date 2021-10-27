@@ -3,6 +3,7 @@ package query
 import (
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type OrderHistory struct {
@@ -12,6 +13,20 @@ type OrderHistory struct {
 	EndDate int64
 	Symbol string
 	TimeInForce TimeInForceAllowedValue
+}
+
+type OrderHistoryResponse []struct {
+	OrderID      string    `json:"order_id"`
+	Symbol       string    `json:"symbol"`
+	Quantity     int       `json:"quantity"`
+	Price        float64   `json:"price"`
+	Status       string    `json:"status"`
+	DateCreated  time.Time `json:"date_created"`
+	DateExecuted string    `json:"date_executed"`
+	OrderType    string    `json:"order_type"`
+	TimeInForce  string    `json:"time_in_force"`
+	Side         string    `json:"side"`
+	ExpiryTime   time.Time `json:"expiry_time,omitempty"`
 }
 
 const orderHistoryPath = "/order/history"
@@ -56,6 +71,10 @@ func (oh OrderHistory) GetParameters() []Parameter {
 	}
 
 	return params
+}
+
+func (oh OrderHistory) GetResponse() interface{} {
+	return &OrderHistoryResponse{}
 }
 
 func (oh OrderHistory) IsPublic() bool {
