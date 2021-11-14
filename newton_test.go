@@ -280,6 +280,26 @@ func TestNewOrder(t *testing.T) {
 	g.Expect(err).Should(gomega.BeNil())
 }
 
+func TestCancelOrder(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
+
+	q := &query.CancelOrder{
+		Body: query.CancelOrderBody{
+			OrderId: "test",
+		},
+	}
+
+	_, err := sut.Do(q)
+
+	g.Expect(err).Should(gomega.BeNil())
+}
+
 // Newton's mock server does not utilize authnetication headers.
 // Therefore, to fully test the API, we must test any private production endpoint
 // with real credentials.

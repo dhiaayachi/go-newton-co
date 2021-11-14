@@ -20,7 +20,7 @@ type NewOrder struct {
 }
 
 type NewOrderResponse struct {
-	OrderID      string    `json:"order_id"`
+	OrderId      string    `json:"order_id"`
 	Symbol       string    `json:"symbol"`
 	Quantity     float64       `json:"quantity"`
 	Price        float64   `json:"price"`
