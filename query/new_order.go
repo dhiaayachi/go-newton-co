@@ -19,17 +19,15 @@ type NewOrder struct {
 	Body NewOrderBody
 }
 
-type NewOrderResponse []struct {
+type NewOrderResponse struct {
 	OrderID      string    `json:"order_id"`
 	Symbol       string    `json:"symbol"`
-	Quantity     int       `json:"quantity"`
+	Quantity     float64       `json:"quantity"`
 	Price        float64   `json:"price"`
-	DateCreated  time.Time `json:"date_created"`
 	OrderType    string    `json:"order_type"`
 	TimeInForce  string    `json:"time_in_force"`
 	Side         string    `json:"side"`
-	QuantityLeft float64   `json:"quantity_left"`
-	ExpiryTime   time.Time `json:"expiry_time"`
+	DateCreated  time.Time `json:"date_created"`
 }
 
 const newOrderPath = "/order/new"
@@ -55,7 +53,7 @@ func (no NewOrder) GetParameters() []Parameter {
 }
 
 func (no NewOrder) GetResponse() interface{} {
-	return &OpenOrdersResponse{}
+	return &NewOrderResponse{}
 }
 
 func (no NewOrder) IsPublic() bool {

@@ -1,16 +1,29 @@
-package newton
+package newton_test
 
 import (
 	"os"
 	"testing"
 	"time"
 
+	"github.com/dhiaayachi/go-newton-co"
 	"github.com/dhiaayachi/go-newton-co/query"
 	"github.com/onsi/gomega"
 )
 
-func getSecrets() (string, string) {
-	return os.Getenv("CLIENT_ID"), os.Getenv("CLIENT_SECRET")
+const(
+	mockClientId = "mock_id"
+	mock_client_secret = "mock_secret"
+	mockServerURL = "https://stoplight.io/mocks/newton/newton-api-docs/431375"
+)
+
+func TestNewNewton(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := newton.New(mockClientId, mock_client_secret)
+
+	g.Expect(sut.ClientId).Should(gomega.Equal(mockClientId))
+	g.Expect(sut.ClientSecret).Should(gomega.Equal(mock_client_secret))
+	g.Expect(sut.BaseUrl).Should(gomega.Equal(newton.BaseURL))
 }
 
 // Public API
@@ -18,8 +31,11 @@ func getSecrets() (string, string) {
 func TestGetTickSizes(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	ClientId, ClientSecret := getSecrets()
-	sut := New(ClientId, ClientSecret)
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
 
 	_, err := sut.Do(&query.TickSizes{})
 
@@ -29,8 +45,11 @@ func TestGetTickSizes(t *testing.T) {
 func TestGetMaximumTradeAmounts(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	ClientId, ClientSecret := getSecrets()
-	sut := New(ClientId, ClientSecret)
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
 
 	_, err := sut.Do(&query.MaximumTradeAmounts{})
 
@@ -40,8 +59,11 @@ func TestGetMaximumTradeAmounts(t *testing.T) {
 func TestGetApplicableFees(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	ClientId, ClientSecret := getSecrets()
-	sut := New(ClientId, ClientSecret)
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
 
 	_, err := sut.Do(&query.ApplicableFees{})
 
@@ -51,8 +73,11 @@ func TestGetApplicableFees(t *testing.T) {
 func TestSymbolsNoQuery(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	ClientId, ClientSecret := getSecrets()
-	sut := New(ClientId, ClientSecret)
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
 
 	q := &query.Symbols{
 		BaseAsset: query.NO_FILTER,
@@ -67,8 +92,11 @@ func TestSymbolsNoQuery(t *testing.T) {
 func TestSymbolsWithQuery(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	ClientId, ClientSecret := getSecrets()
-	sut := New(ClientId, ClientSecret)
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
 
 	q := &query.Symbols{
 		BaseAsset: "BTC",
@@ -83,8 +111,11 @@ func TestSymbolsWithQuery(t *testing.T) {
 func TestHealthCheck(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	ClientId, ClientSecret := getSecrets()
-	sut := New(ClientId, ClientSecret)
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
 
 	_, err := sut.Do(&query.HealthCheck{})
 
@@ -94,8 +125,11 @@ func TestHealthCheck(t *testing.T) {
 func TestGetMinTradeAmounts(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	ClientId, ClientSecret := getSecrets()
-	sut := New(ClientId, ClientSecret)
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
 
 	_, err := sut.Do(&query.MinimumTradeAmounts{})
 
@@ -107,8 +141,11 @@ func TestGetMinTradeAmounts(t *testing.T) {
 func TestBalances(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	ClientId, ClientSecret := getSecrets()
-	sut := New(ClientId, ClientSecret)
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
 
 	q := &query.Balances{Asset: "BTC"}
 	_, err := sut.Do(q)
@@ -119,8 +156,11 @@ func TestBalances(t *testing.T) {
 func TestBalancesNoQuery(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	ClientId, ClientSecret := getSecrets()
-	sut := New(ClientId, ClientSecret)
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
 
 	q := &query.Balances{Asset: query.NO_FILTER}
 	_, err := sut.Do(q)
@@ -131,8 +171,11 @@ func TestBalancesNoQuery(t *testing.T) {
 func TestActions(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	ClientId, ClientSecret := getSecrets()
-	sut := New(ClientId, ClientSecret)
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
 
 	q := &query.Actions{
 		ActionType: query.DEPOSIT,
@@ -150,8 +193,11 @@ func TestActions(t *testing.T) {
 func TestActionsNoQuery(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	ClientId, ClientSecret := getSecrets()
-	sut := New(ClientId, ClientSecret)
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
 
 	req := &query.Actions{
 		ActionType: query.ActionType(query.NO_FILTER),
@@ -169,8 +215,11 @@ func TestActionsNoQuery(t *testing.T) {
 func TestOrderHistory(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	ClientId, ClientSecret := getSecrets()
-	sut := New(ClientId, ClientSecret)
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
 
 	q := &query.OrderHistory{
 		Limit: 1, 
@@ -189,8 +238,11 @@ func TestOrderHistory(t *testing.T) {
 func TestOpenOrders(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	ClientId, ClientSecret := getSecrets()
-	sut := New(ClientId, ClientSecret)
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
 
 	q := &query.OpenOrders{
 		Limit:       1,
@@ -198,6 +250,55 @@ func TestOpenOrders(t *testing.T) {
 		Symbol:      "BTC_USDC",
 		TimeInForce: "IOC"}
 
+	_, err := sut.Do(q)
+
+	g.Expect(err).Should(gomega.BeNil())
+}
+
+func TestNewOrder(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	sut := newton.Newton{
+		mockClientId,
+		mock_client_secret,
+		mockServerURL,
+	}
+
+	q := &query.NewOrder{
+		Body: query.NewOrderBody{
+			OrderType:   "LIMIT",
+			TimeInForce: query.IOC,
+			Side:        "BUY",
+			Symbol:      "BTC_USDC",
+			Price:       1000,
+			Quantity:    0.0001,
+			},
+	}
+
+	_, err := sut.Do(q)
+
+	g.Expect(err).Should(gomega.BeNil())
+}
+
+// Newton's mock server does not utilize authnetication headers.
+// Therefore, to fully test the API, we must test any private production endpoint
+// with real credentials.
+func TestAuthentication(t *testing.T) {
+	if os.Getenv("TEST_AUTH") != "true" {
+		t.Skip("Skipping authentication test in production environment.")
+	}
+	g := gomega.NewGomegaWithT(t)
+
+	productionClientId := os.Getenv("CLIENT_ID")
+	productionClientSecret := os.Getenv("CLIENT_SECRET")
+
+	sut := newton.Newton{
+		productionClientId,
+		productionClientSecret,
+		newton.BaseURL, // production URL
+	}
+
+	q := &query.Balances{Asset: "BTC"}
 	_, err := sut.Do(q)
 
 	g.Expect(err).Should(gomega.BeNil())

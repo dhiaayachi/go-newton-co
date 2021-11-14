@@ -20,8 +20,9 @@ import (
 const baseUrl = "https://api.newton.co/v1"
 
 type Newton struct {
-	clientId     string
-	clientSecret string
+	ClientId     string
+	ClientSecret string
+	BaseUrl	  string
 }
 
 type Response struct {
@@ -30,7 +31,7 @@ type Response struct {
 }
 
 func New(ClientId string, ClientSecret string) *Newton {
-	return &Newton{ClientId, ClientSecret}
+	return &Newton{ClientId, ClientSecret, baseUrl}
 }
 
 func (n *Newton) sign(req *http.Request) error {
@@ -72,7 +73,7 @@ func (n *Newton) sign(req *http.Request) error {
 
 	raw := strings.Join(toJoin, ":")
 
-	mac := hmac.New(sha256.New, []byte(n.clientSecret))
+	mac := hmac.New(sha256.New, []byte(n.ClientSecret))
 	if _, err := mac.Write([]byte(raw)); err != nil {
 		return fmt.Errorf("mac write: %w", err)
 	}
@@ -80,7 +81,7 @@ func (n *Newton) sign(req *http.Request) error {
 	signedBase64 := base64.StdEncoding.EncodeToString(mac.Sum(nil))
 
 	req.Header.Add("NewtonDate", currentTime)
-	req.Header.Add("NewtonAPIAuth", n.clientId+":"+signedBase64)
+	req.Header.Add("NewtonAPIAuth", n.ClientId+":"+signedBase64)
 
 	return nil
 }
@@ -93,7 +94,7 @@ func (n *Newton) Do(query query.Query) (*Response, error) {
 
 	req, _ := http.NewRequest(
 		query.GetMethod(),
-		baseUrl + query.GetPath(), 
+		n.BaseUrl + query.GetPath(), 
 		bytes.NewBuffer(body))
 	
 	q := req.URL.Query()
