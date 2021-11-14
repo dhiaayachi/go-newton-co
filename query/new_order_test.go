@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	body query.NewOrderBody = query.NewOrderBody{
+	newOrderBody query.NewOrderBody = query.NewOrderBody{
 	OrderType:   "LIMIT",
 	TimeInForce: query.IOC,
 	Side:        "BUY",
@@ -21,7 +21,7 @@ var (
 	Quantity:    2.5,
 	}
 	validNewOrder query.NewOrder = query.NewOrder{
-		Body: body,
+		Body: newOrderBody,
 	}
 )
 
@@ -37,7 +37,7 @@ func TestNewOrderGetBody(t *testing.T) {
 	err = json.Unmarshal([]byte(actualBody), &actualBodyParsed)
 	g.Expect(err).Should(gomega.BeNil())
 
-	g.Expect(actualBodyParsed).Should(gomega.BeEquivalentTo(body))
+	g.Expect(actualBodyParsed).Should(gomega.BeEquivalentTo(newOrderBody))
 }
 
 func TestNewOrderGetMethod(t *testing.T) {
