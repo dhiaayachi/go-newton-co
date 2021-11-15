@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,111 +13,25 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/dhiaayachi/go-newton-co/query"
 )
 
 const baseUrl = "https://api.newton.co/v1"
 
-type ActionType string
-
-const (
-	DEPOSIT    ActionType = "DEPOSIT"
-	WITHDRAWAL ActionType = "WITHDRAWAL"
-	TRANSACT   ActionType = "TRANSACT"
-)
-
 type Newton struct {
-	clientId     string
-	clientSecret string
+	ClientId     string
+	ClientSecret string
+	BaseUrl      string
 }
 
-type Args struct {
-	Key   string
-	Value string
-}
-
-type NewOrderReq struct {
-	OrderType   string  `json:"order_type"`
-	TimeInForce string  `json:"time_in_force"`
-	Side        string  `json:"side"`
-	Symbol      string  `json:"symbol"`
-	Price       float64 `json:"price"`
-	Quantity    float64 `json:"quantity"`
-}
-
-type GetTickSizesResp struct {
-	Ticks map[string]struct {
-		Tick float64 `json:"tick"`
-	}
-}
-
-type GetMaxTradeAmountsResp struct {
-	TradeAmounts map[string]struct {
-		Buy  float64 `json:"buy"`
-		Sell float64 `json:"sell"`
-	}
-}
-
-type GetApplicableFeesResp struct {
-	Fees struct {
-		Maker float64 `json:"maker"`
-		Taker float64 `json:"taker"`
-	}
-}
-
-type GetMinTradeAmountsResp GetMaxTradeAmountsResp
-
-type GetSymbolsResp struct {
-	Symbols []string
-}
-
-type BalancesResp struct {
-	Balances map[string]float64
-}
-
-type OpenOrdersResp struct {
-	OpenOrders []struct {
-		OrderID      string    `json:"order_id"`
-		Symbol       string    `json:"symbol"`
-		Quantity     int       `json:"quantity"`
-		Price        float64   `json:"price"`
-		DateCreated  time.Time `json:"date_created"`
-		OrderType    string    `json:"order_type"`
-		TimeInForce  string    `json:"time_in_force"`
-		Side         string    `json:"side"`
-		QuantityLeft float64   `json:"quantity_left"`
-		ExpiryTime   time.Time `json:"expiry_time"`
-	}
-}
-
-type OrdersHistoryResp struct {
-	OrdersHistory []struct {
-		OrderID      string    `json:"order_id"`
-		Symbol       string    `json:"symbol"`
-		Quantity     int       `json:"quantity"`
-		Price        float64   `json:"price"`
-		Status       string    `json:"status"`
-		DateCreated  time.Time `json:"date_created"`
-		DateExecuted string    `json:"date_executed"`
-		OrderType    string    `json:"order_type"`
-		TimeInForce  string    `json:"time_in_force"`
-		Side         string    `json:"side"`
-		ExpiryTime   time.Time `json:"expiry_time,omitempty"`
-	}
-}
-
-type ActionsResp struct {
-	Actions []struct {
-		Type        string    `json:"type"`
-		Asset       string    `json:"asset"`
-		Quantity    float64   `json:"quantity"`
-		Status      string    `json:"status"`
-		DateCreated time.Time `json:"date_created"`
-		Price       float64   `json:"price,omitempty"`
-	}
+type Response struct {
+	StatusCode int
+	Body       interface{}
 }
 
 func New(ClientId string, ClientSecret string) *Newton {
-	return &Newton{ClientId, ClientSecret}
+	return &Newton{ClientId, ClientSecret, baseUrl}
 }
 
 func (n *Newton) sign(req *http.Request) error {
@@ -160,7 +73,7 @@ func (n *Newton) sign(req *http.Request) error {
 
 	raw := strings.Join(toJoin, ":")
 
-	mac := hmac.New(sha256.New, []byte(n.clientSecret))
+	mac := hmac.New(sha256.New, []byte(n.ClientSecret))
 	if _, err := mac.Write([]byte(raw)); err != nil {
 		return fmt.Errorf("mac write: %w", err)
 	}
@@ -168,407 +81,85 @@ func (n *Newton) sign(req *http.Request) error {
 	signedBase64 := base64.StdEncoding.EncodeToString(mac.Sum(nil))
 
 	req.Header.Add("NewtonDate", currentTime)
-	req.Header.Add("NewtonAPIAuth", n.clientId+":"+signedBase64)
+	req.Header.Add("NewtonAPIAuth", n.ClientId+":"+signedBase64)
 
 	return nil
 }
 
-// Public API
-///////////////////////////////////////////////////////////////////////////////////////////////////
-func (n *Newton) doPublicQuery(path string, method string, args []Args, body string) (*http.Response, error) {
-	url := baseUrl + path
+func (n *Newton) Do(query query.Query) (*Response, error) {
+	body, err := query.GetBody()
+	if err != nil {
+		return nil, err
+	}
 
-	req, _ := http.NewRequest(method, url, nil)
+	req, _ := http.NewRequest(
+		query.GetMethod(),
+		n.BaseUrl+query.GetPath(),
+		bytes.NewBuffer(body))
+
 	q := req.URL.Query()
-	for _, a := range args {
+	for _, a := range query.GetParameters() {
 		q.Add(a.Key, a.Value)
 	}
+
 	req.URL.RawQuery = q.Encode()
-	if method != http.MethodGet {
-		_, err := req.Body.Read([]byte(body))
+	if query.GetMethod() != http.MethodGet {
+		req.Header.Add("content-type", "application/json")
+	}
+
+	if !query.IsPublic() {
+		err := n.sign(req)
 		if err != nil {
 			return nil, err
 		}
-		req.Header.Add("content-type", "application/json")
 	}
 
 	res, err := http.DefaultClient.Do(req)
-
-	return res, err
-}
-
-func (n *Newton) GetTickSizes() (*GetTickSizesResp, error) {
-	res, err := n.doPublicQuery("/order/tick-sizes", http.MethodGet, []Args{}, "")
 	if err != nil {
 		return nil, err
 	}
+
+	parsedResponse, err := n.parseResponse(res, query.GetResponse())
+	if err != nil {
+		return nil, err
+	}
+
+	return parsedResponse, err
+}
+
+func (n *Newton) parseResponse(res *http.Response, toParseTo interface{}) (*Response, error) {
 	defer func() {
 		err := res.Body.Close()
 		if err != nil {
 			log.Printf("error:%s", err.Error())
 		}
 	}()
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
+
+	parsedResponse := &Response{
+		StatusCode: res.StatusCode,
+		Body:       nil,
 	}
 
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
 
-	var resp GetTickSizesResp
-	err = json.Unmarshal(body, &resp.Ticks)
+	if toParseTo == nil {
+		return parsedResponse, nil
+	}
+
 	if err != nil {
-		return nil, err
+		return parsedResponse, err
 	}
 
-	return &resp, nil
-}
+	if parsedResponse.StatusCode != http.StatusOK {
+		return parsedResponse, fmt.Errorf("request failed :: %d :: %s", res.StatusCode, body)
+	}
 
-func (n *Newton) GetMaximumTradeAmounts() (*GetMaxTradeAmountsResp, error) {
-	res, err := n.doPublicQuery("/order/maximums", http.MethodGet, []Args{}, "")
+	err = json.Unmarshal(body, toParseTo)
 	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
+		return parsedResponse, err
 	}
 
-	body, _ := ioutil.ReadAll(res.Body)
+	parsedResponse.Body = toParseTo
 
-	var resp GetMaxTradeAmountsResp
-	err = json.Unmarshal(body, &resp.TradeAmounts)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp, nil
-}
-
-func (n *Newton) GetApplicableFees() (*GetApplicableFeesResp, error) {
-	res, err := n.doPublicQuery("/fees", http.MethodGet, []Args{}, "")
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
-	}
-
-	body, _ := ioutil.ReadAll(res.Body)
-
-	var resp GetApplicableFeesResp
-	err = json.Unmarshal(body, &resp.Fees)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp, nil
-}
-
-func (n *Newton) GetSymbols(baseAsset, quoteAsset string) (*GetSymbolsResp, error) {
-	args := []Args{}
-	if baseAsset != "" {
-		args = append(args, Args{Key: "base_asset", Value: baseAsset})
-	}
-
-	if quoteAsset != "" {
-		args = append(args, Args{Key: "quote_asset", Value: quoteAsset})
-	}
-
-	res, err := n.doPublicQuery("/symbols", http.MethodGet, args, "")
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
-	}
-
-	body, _ := ioutil.ReadAll(res.Body)
-
-	var resp GetSymbolsResp
-	err = json.Unmarshal(body, &resp.Symbols)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp, nil
-}
-
-func (n *Newton) HealthCheck() error {
-	res, err := n.doPublicQuery("/symbols", http.MethodGet, []Args{}, "")
-	if err != nil {
-		return err
-	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	if res.StatusCode != http.StatusOK {
-		return errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
-	}
-
-	return nil
-}
-
-func (n *Newton) GetMinimumTradeAmount() (*GetMinTradeAmountsResp, error) {
-	res, err := n.doPublicQuery("/order/minimums", http.MethodGet, []Args{}, "")
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
-	}
-
-	body, _ := ioutil.ReadAll(res.Body)
-
-	var resp GetMinTradeAmountsResp
-	err = json.Unmarshal(body, &resp.TradeAmounts)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp, nil
-}
-
-// Private API
-///////////////////////////////////////////////////////////////////////////////////////////////////
-func (n *Newton) doPrivateQuery(path string, method string, args []Args, body string) (*http.Response, error) {
-	url := baseUrl + path
-
-	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
-	q := req.URL.Query()
-	for _, a := range args {
-		q.Add(a.Key, a.Value)
-	}
-	req.URL.RawQuery = q.Encode()
-	if method != http.MethodGet {
-		req.Header.Add("content-type", "application/json")
-	}
-	err := n.sign(req)
-	if err != nil {
-		return nil, err
-	}
-	res, err := http.DefaultClient.Do(req)
-
-	return res, err
-}
-
-func (n *Newton) Balances(asset string) (*BalancesResp, error) {
-
-	a := make([]Args, 1)
-
-	a[0].Key = "asset"
-	a[0].Value = asset
-	res, err := n.doPrivateQuery("/balances", http.MethodGet, a, "")
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
-	}
-
-	body, _ := ioutil.ReadAll(res.Body)
-
-	var b BalancesResp
-	err = json.Unmarshal(body, &b.Balances)
-	if err != nil {
-		return nil, err
-	}
-
-	return &b, nil
-}
-
-func (n *Newton) Actions(actionType ActionType, limit int, offset int, startDate int64, endDate int64) (*ActionsResp, error) {
-
-	a := make([]Args, 5)
-
-	a[0].Key = "action_type"
-	a[0].Value = string(actionType)
-
-	a[1].Key = "end_date"
-	a[1].Value = strconv.FormatInt(endDate, 10)
-
-	a[2].Key = "limit"
-	a[2].Value = strconv.Itoa(limit)
-
-	a[3].Key = "offset"
-	a[3].Value = strconv.Itoa(offset)
-
-	a[4].Key = "start_date"
-	a[4].Value = strconv.FormatInt(startDate, 10)
-
-	res, err := n.doPrivateQuery("/actions", http.MethodGet, a, "")
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	body, _ := ioutil.ReadAll(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
-	}
-
-	var r ActionsResp
-	err = json.Unmarshal(body, &r.Actions)
-	if err != nil {
-		return nil, err
-	}
-
-	return &r, nil
-}
-
-func (n *Newton) OrdersHistory(limit int, offset int, startDate int64, endDate int64, symbol string, timeInForce string) (*OrdersHistoryResp, error) {
-
-	a := make([]Args, 10)
-
-	a[1].Key = "end_date"
-	a[1].Value = strconv.FormatInt(endDate, 10)
-
-	a[2].Key = "limit"
-	a[2].Value = strconv.Itoa(limit)
-
-	a[3].Key = "offset"
-	a[3].Value = strconv.Itoa(offset)
-
-	a[4].Key = "start_date"
-	a[4].Value = strconv.FormatInt(startDate, 10)
-
-	a[5].Key = "symbol"
-	a[5].Value = symbol
-
-	a[6].Key = "time_in_force"
-	a[6].Value = timeInForce
-
-	res, err := n.doPrivateQuery("/order/history", http.MethodGet, a, "")
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	body, _ := ioutil.ReadAll(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
-	}
-
-	var r OrdersHistoryResp
-	err = json.Unmarshal(body, &r.OrdersHistory)
-	if err != nil {
-		return nil, err
-	}
-
-	return &r, nil
-}
-
-func (n *Newton) OpenOrders(limit int, offset int, symbol string, timeInForce string) (*OpenOrdersResp, error) {
-
-	a := make([]Args, 10)
-
-	a[1].Key = "limit"
-	a[1].Value = strconv.Itoa(limit)
-
-	a[2].Key = "offset"
-	a[2].Value = strconv.Itoa(offset)
-
-	a[3].Key = "symbol"
-	a[3].Value = symbol
-
-	a[4].Key = "time_in_force"
-	a[4].Value = timeInForce
-
-	res, err := n.doPrivateQuery("/order/history", http.MethodGet, a, "")
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("request failed :: %d", res.StatusCode))
-	}
-
-	body, _ := ioutil.ReadAll(res.Body)
-
-	var r OpenOrdersResp
-	err = json.Unmarshal(body, &r.OpenOrders)
-	if err != nil {
-		return nil, err
-	}
-
-	return &r, nil
-}
-
-func (n *Newton) NewOrder(orderType string, timeInForce string, side string, symbol string, price float64, quantity float64) (*OpenOrdersResp, error) {
-
-	order := NewOrderReq{orderType, timeInForce, side, symbol, price, quantity}
-
-	b, err := json.Marshal(&order)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := n.doPrivateQuery("/order/new", http.MethodPost, nil, string(b))
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			log.Printf("error:%s", err.Error())
-		}
-	}()
-	if res.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(res.Body)
-		return nil, errors.New(fmt.Sprintf("request failed :: %d %s", res.StatusCode, body))
-	}
-
-	body, _ := ioutil.ReadAll(res.Body)
-
-	var r OpenOrdersResp
-	err = json.Unmarshal(body, &r.OpenOrders)
-	if err != nil {
-		return nil, err
-	}
-
-	return &r, nil
+	return parsedResponse, nil
 }
