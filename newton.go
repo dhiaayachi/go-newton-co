@@ -140,11 +140,11 @@ func (n *Newton) parseResponse(res *http.Response, toParseTo interface{}) (*Resp
 		Body:       nil,
 	}
 
+	body, err := ioutil.ReadAll(res.Body)
+
 	if toParseTo == nil {
 		return parsedResponse, nil
 	}
-
-	body, err := ioutil.ReadAll(res.Body)
 
 	if err != nil {
 		return parsedResponse, err
