@@ -44,11 +44,11 @@ func (a Actions) GetParameters() []Parameter {
 		params = append(params, Parameter{string(ActionTypeKey), string(a.ActionType)})
 	}
 
-	if a.Limit != int(ANY) {
+	if a.Limit != ANY {
 		params = append(params, Parameter{string(Limit), strconv.Itoa(a.Limit)})
 	}
 
-	if a.Offset != int(ANY) {
+	if a.Offset != ANY {
 		params = append(params, Parameter{string(Offset), strconv.Itoa(a.Offset)})
 	}
 

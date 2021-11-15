@@ -14,6 +14,7 @@ const (
 	mockClientId       = "mock_id"
 	mock_client_secret = "mock_secret"
 	mockServerURL      = "https://stoplight.io/mocks/newton/newton-api-docs/431375"
+	productionServerURL = "https://api.newton.co/v1"
 )
 
 func TestNewNewton(t *testing.T) {
@@ -23,7 +24,7 @@ func TestNewNewton(t *testing.T) {
 
 	g.Expect(sut.ClientId).Should(gomega.Equal(mockClientId))
 	g.Expect(sut.ClientSecret).Should(gomega.Equal(mock_client_secret))
-	g.Expect(sut.BaseUrl).Should(gomega.Equal(newton.BaseURL))
+	g.Expect(sut.BaseUrl).Should(gomega.Equal(productionServerURL))
 }
 
 // Public API
@@ -312,11 +313,7 @@ func TestAuthentication(t *testing.T) {
 	productionClientId := os.Getenv("CLIENT_ID")
 	productionClientSecret := os.Getenv("CLIENT_SECRET")
 
-	sut := newton.Newton{
-		productionClientId,
-		productionClientSecret,
-		newton.BaseURL, // production URL
-	}
+	sut := newton.New(productionClientId, productionClientSecret)
 
 	q := &query.Balances{Asset: "BTC"}
 	_, err := sut.Do(q)
