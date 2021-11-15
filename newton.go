@@ -22,12 +22,12 @@ const baseUrl = "https://api.newton.co/v1"
 type Newton struct {
 	ClientId     string
 	ClientSecret string
-	BaseUrl	  string
+	BaseUrl      string
 }
 
 type Response struct {
 	StatusCode int
-	Body interface{}
+	Body       interface{}
 }
 
 func New(ClientId string, ClientSecret string) *Newton {
@@ -94,9 +94,9 @@ func (n *Newton) Do(query query.Query) (*Response, error) {
 
 	req, _ := http.NewRequest(
 		query.GetMethod(),
-		n.BaseUrl + query.GetPath(), 
+		n.BaseUrl+query.GetPath(),
 		bytes.NewBuffer(body))
-	
+
 	q := req.URL.Query()
 	for _, a := range query.GetParameters() {
 		q.Add(a.Key, a.Value)
@@ -137,7 +137,7 @@ func (n *Newton) parseResponse(res *http.Response, toParseTo interface{}) (*Resp
 
 	parsedResponse := &Response{
 		StatusCode: res.StatusCode,
-		Body: nil,
+		Body:       nil,
 	}
 
 	if toParseTo == nil {

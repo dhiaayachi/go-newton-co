@@ -10,10 +10,10 @@ import (
 	"github.com/onsi/gomega"
 )
 
-const(
-	mockClientId = "mock_id"
+const (
+	mockClientId       = "mock_id"
 	mock_client_secret = "mock_secret"
-	mockServerURL = "https://stoplight.io/mocks/newton/newton-api-docs/431375"
+	mockServerURL      = "https://stoplight.io/mocks/newton/newton-api-docs/431375"
 )
 
 func TestNewNewton(t *testing.T) {
@@ -80,7 +80,7 @@ func TestSymbolsNoQuery(t *testing.T) {
 	}
 
 	q := &query.Symbols{
-		BaseAsset: query.NO_FILTER,
+		BaseAsset:  query.NO_FILTER,
 		QuoteAsset: query.NO_FILTER,
 	}
 
@@ -99,7 +99,7 @@ func TestSymbolsWithQuery(t *testing.T) {
 	}
 
 	q := &query.Symbols{
-		BaseAsset: "BTC",
+		BaseAsset:  "BTC",
 		QuoteAsset: "ETH",
 	}
 
@@ -222,11 +222,11 @@ func TestOrderHistory(t *testing.T) {
 	}
 
 	q := &query.OrderHistory{
-		Limit: 1, 
-		Offset: 0,
-		StartDate: time.Date(2020, 01, 01, 00, 00, 00, 00, time.Local).Unix(),
-		EndDate: time.Date(2020, 01, 01, 01, 00, 00, 00, time.Local).Unix(),
-		Symbol: "BTC_USDC",
+		Limit:       1,
+		Offset:      0,
+		StartDate:   time.Date(2020, 01, 01, 00, 00, 00, 00, time.Local).Unix(),
+		EndDate:     time.Date(2020, 01, 01, 01, 00, 00, 00, time.Local).Unix(),
+		Symbol:      "BTC_USDC",
 		TimeInForce: "IOC",
 	}
 
@@ -272,7 +272,7 @@ func TestNewOrder(t *testing.T) {
 			Symbol:      "BTC_USDC",
 			Price:       1000,
 			Quantity:    0.0001,
-			},
+		},
 	}
 
 	_, err := sut.Do(q)
