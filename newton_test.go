@@ -11,19 +11,19 @@ import (
 )
 
 const (
-	mockClientId       = "mock_id"
-	mock_client_secret = "mock_secret"
-	mockServerURL      = "https://stoplight.io/mocks/newton/newton-api-docs/431375"
+	mockClientId        = "mock_id"
+	mockClientSecret    = "mock_secret"
+	mockServerURL       = "https://stoplight.io/mocks/newton/newton-api-docs/431375"
 	productionServerURL = "https://api.newton.co/v1"
 )
 
 func TestNewNewton(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	sut := newton.New(mockClientId, mock_client_secret)
+	sut := newton.New(mockClientId, mockClientSecret)
 
 	g.Expect(sut.ClientId).Should(gomega.Equal(mockClientId))
-	g.Expect(sut.ClientSecret).Should(gomega.Equal(mock_client_secret))
+	g.Expect(sut.ClientSecret).Should(gomega.Equal(mockClientSecret))
 	g.Expect(sut.BaseUrl).Should(gomega.Equal(productionServerURL))
 }
 
@@ -33,9 +33,9 @@ func TestGetTickSizes(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	_, err := sut.Do(&query.TickSizes{})
@@ -47,9 +47,9 @@ func TestGetMaximumTradeAmounts(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	_, err := sut.Do(&query.MaximumTradeAmounts{})
@@ -61,9 +61,9 @@ func TestGetApplicableFees(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	_, err := sut.Do(&query.ApplicableFees{})
@@ -75,9 +75,9 @@ func TestSymbolsNoQuery(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	q := &query.Symbols{
@@ -94,9 +94,9 @@ func TestSymbolsWithQuery(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	q := &query.Symbols{
@@ -113,9 +113,9 @@ func TestHealthCheck(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	_, err := sut.Do(&query.HealthCheck{})
@@ -127,9 +127,9 @@ func TestGetMinTradeAmounts(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	_, err := sut.Do(&query.MinimumTradeAmounts{})
@@ -143,9 +143,9 @@ func TestBalances(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	q := &query.Balances{Asset: "BTC"}
@@ -158,9 +158,9 @@ func TestBalancesNoQuery(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	q := &query.Balances{Asset: query.NO_FILTER}
@@ -173,9 +173,9 @@ func TestActions(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	q := &query.Actions{
@@ -195,15 +195,15 @@ func TestActionsNoQuery(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	req := &query.Actions{
 		ActionType: query.ActionType(query.NO_FILTER),
-		Limit:      int(query.ANY),
-		Offset:     int(query.ANY),
+		Limit:      query.ANY,
+		Offset:     query.ANY,
 		StartDate:  int64(query.ANY),
 		EndDate:    int64(query.ANY),
 	}
@@ -217,9 +217,9 @@ func TestOrderHistory(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	q := &query.OrderHistory{
@@ -240,9 +240,9 @@ func TestOpenOrders(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	q := &query.OpenOrders{
@@ -260,9 +260,9 @@ func TestNewOrder(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	q := &query.NewOrder{
@@ -285,9 +285,9 @@ func TestCancelOrder(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	sut := newton.Newton{
-		mockClientId,
-		mock_client_secret,
-		mockServerURL,
+		ClientId:     mockClientId,
+		ClientSecret: mockClientSecret,
+		BaseUrl:      mockServerURL,
 	}
 
 	q := &query.CancelOrder{
@@ -312,8 +312,9 @@ func TestAuthentication(t *testing.T) {
 
 	productionClientId := os.Getenv("CLIENT_ID")
 	productionClientSecret := os.Getenv("CLIENT_SECRET")
+	proxyUrl := os.Getenv("PROXY_URL")
 
-	sut := newton.New(productionClientId, productionClientSecret)
+	sut := newton.Newton{ClientId: productionClientId, ClientSecret: productionClientSecret, BaseUrl: proxyUrl}
 
 	q := &query.Balances{Asset: "BTC"}
 	_, err := sut.Do(q)
