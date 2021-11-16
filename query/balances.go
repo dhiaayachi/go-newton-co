@@ -33,7 +33,7 @@ func (b Balances) GetParameters() []Parameter {
 }
 
 func (b Balances) GetResponse() interface{} {
-	return &Balances{}
+	return &BalancesResponse{}
 }
 
 func (b Balances) IsPublic() bool {
