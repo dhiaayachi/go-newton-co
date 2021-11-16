@@ -22,4 +22,9 @@ jobs:
       run: go build -v ./...
 
     - name: Test
+      env:
+        CLIENT_ID: ${{ secrets.CLIENT_ID }}
+        CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+        PROXY_URL: ${{ secrets.PROXY_URL }}
+        TEST_AUTH: true
       run: go test -v ./...
